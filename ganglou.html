@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>肛瘘术后专区 - 扶墙走</title>
+  <style>
+    :root {
+      --primary: #E8927C;
+      --primary-light: #F5C6B8;
+      --primary-dark: #C96B55;
+      --warm-bg: #FFF8F5;
+      --warm-card: #FFFFFF;
+      --text-main: #4A3728;
+      --text-sub: #8C7B6E;
+      --text-light: #B8A99E;
+      --accent-green: #7EBF8E;
+      --accent-blue: #8BBBD9;
+      --accent-yellow: #F2C94C;
+      --shadow: 0 4px 20px rgba(232, 146, 124, 0.12);
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--warm-bg);
+      color: var(--text-main);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== Top Bar ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--warm-card);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .back-btn {
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+    .top-bar .title {
+      flex: 1;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-right: 38px;
+    }
+
+    /* ===== Page Banner ===== */
+    .page-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-banner::before {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 100px; height: 100px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+    }
+    .page-banner .banner-icon { font-size: 48px; margin-bottom: 8px; }
+    .page-banner .banner-title { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+    .page-banner .banner-sub { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 4px; }
+
+    /* ===== Section ===== */
+    .section { padding: 24px 16px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    .section-title .icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; margin-right: 10px; flex-shrink: 0;
+    }
+    .section-title .line {
+      flex: 1; height: 1px; background: var(--primary-light); margin-left: 12px;
+    }
+
+    /* ===== Recovery Timeline ===== */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 8px; bottom: 8px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--primary-light), #eee);
+      border-radius: 1px;
+    }
+    .timeline-item { position: relative; margin-bottom: 20px; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px; top: 8px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--warm-card);
+      border: 3px solid var(--primary);
+    }
+    .timeline-item.active::before {
+      background: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .timeline-item .time { font-size: 12px; color: var(--text-light); }
+    .timeline-item .event {
+      font-size: 14px; color: var(--text-main);
+      background: var(--warm-card); padding: 12px 16px;
+      border-radius: 12px; margin-top: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .timeline-item.active .event { border-left: 3px solid var(--primary); }
+
+    /* ===== Care Cards ===== */
+    .care-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .care-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .care-card:active { transform: scale(0.97); }
+    .care-card .card-icon { font-size: 36px; margin-bottom: 8px; }
+    .care-card .card-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+    .care-card .card-desc { font-size: 11px; color: var(--text-light); line-height: 1.5; }
+
+    /* ===== Tip List ===== */
+    .tip-list { display: flex; flex-direction: column; gap: 10px; }
+    .tip-item {
+      display: flex; align-items: flex-start;
+      background: var(--warm-card); border-radius: 12px;
+      padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .tip-item .tip-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--primary); margin-top: 7px; margin-right: 12px; flex-shrink: 0;
+    }
+    .tip-item .tip-content { flex: 1; }
+    .tip-item .tip-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .tip-item .tip-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+    /* ===== Reminder ===== */
+    .reminder-card {
+      background: linear-gradient(135deg, #FFF5F0 0%, #FFF0EB 100%);
+      border-radius: var(--radius); padding: 20px;
+      border: 1px solid var(--primary-light);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .reminder-card .rem-icon { font-size: 28px; flex-shrink: 0; }
+    .reminder-card .rem-text { font-size: 13px; color: var(--text-main); }
+    .reminder-card .rem-time { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+    /* ===== Footer ===== */
+    .footer { text-align: center; padding: 32px 16px 40px; color: var(--text-light); }
+    .footer .heart { color: var(--primary); font-size: 14px; }
+    .footer p { font-size: 12px; margin-top: 6px; }
+
+    .fade-in {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== Bottom Nav ===== */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid #f0e8e4;
+      display: flex; justify-content: space-around;
+      padding: 8px 0 env(safe-area-inset-bottom, 8px);
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 4px 0; cursor: pointer; color: var(--text-light);
+      text-decoration: none; transition: color 0.2s;
+      border: none; background: none; font-family: inherit;
+    }
+    .nav-item.active, .nav-item:hover { color: var(--primary); }
+    .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
+    .nav-item .nav-label { font-size: 10px; }
+
+    .spacer { height: 70px; }
+
+    .toast {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(74, 55, 40, 0.88); color: #fff;
+      padding: 16px 28px; border-radius: 12px; font-size: 14px;
+      z-index: 200; opacity: 0; transition: all 0.3s ease;
+      pointer-events: none; text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="index.html" class="back-btn">←</a>
+    <div class="title">肛瘘术后专区</div>
+  </div>
+
+  <!-- Banner -->
+  <div class="page-banner">
+    <div class="banner-icon">🩹</div>
+    <div class="banner-title">肛瘘术后专区</div>
+    <div class="banner-sub">细心护理，静待愈合</div>
+  </div>
+
+  <!-- Recovery Timeline -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF0EC;">🗓️</span>
+      恢复日程
+      <span class="line"></span>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item active">
+        <div class="time">今天</div>
+        <div class="event">按时服药 · 适量走动 · 补充水分</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第3天</div>
+        <div class="event">伤口换药 · 观察恢复情况</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第7天</div>
+        <div class="event">复查日 · 拆线评估</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第14天</div>
+        <div class="event">逐步增加活动量 · 饮食调整</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第30天</div>
+        <div class="event">全面复查 · 评估康复进度</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Care Categories -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#F0F7F2;">🩺</span>
+      养护指南
+      <span class="line"></span>
+    </div>
+    <div class="care-grid">
+      <a href="guide.html" class="care-card">
+        <div class="card-icon">🩹</div>
+        <div class="card-title">伤口护理</div>
+        <div class="card-desc">敷料选购指南</div>
+      </a>
+      <a href="guide.html#body-care" class="care-card">
+        <div class="card-icon">🍵</div>
+        <div class="card-title">身体调养</div>
+        <div class="card-desc">中药调理恢复元气</div>
+      </a>
+      <div class="care-card" onclick="showToast('饮食调理指南整理中…')">
+        <div class="card-icon">🍲</div>
+        <div class="card-title">饮食调理</div>
+        <div class="card-desc">科学饮食助力恢复</div>
+      </div>
+      <div class="care-card" onclick="showToast('心理调适指南整理中…')">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">心理调适</div>
+        <div class="card-desc">保持乐观静待花开</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Daily Tips -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF8E7;">💡</span>
+      今日贴士
+      <span class="line"></span>
+    </div>
+    <div class="tip-list">
+      <div class="tip-item">
+        <div class="tip-dot" style="background: var(--accent-green);"></div>
+        <div class="tip-content">
+          <div class="tip-title">多喝温水</div>
+          <div class="tip-desc">每日 1500-2000ml，促进新陈代谢</div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-dot" style="background: var(--accent-blue);"></div>
+        <div class="tip-content">
+          <div class="tip-title">定时坐浴</div>
+          <div class="tip-desc">便后温水坐浴10-15分钟，保持伤口清洁</div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-dot" style="background: var(--accent-yellow);"></div>
+        <div class="tip-content">
+          <div class="tip-title">充足睡眠</div>
+          <div class="tip-desc">早睡早起，保证7-8小时睡眠</div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-dot"></div>
+        <div class="tip-content">
+          <div class="tip-title">观察伤口</div>
+          <div class="tip-desc">每日观察伤口渗出情况，有异常及时就医</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reminder -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF0EB;">⏰</span>
+      用药提醒
+      <span class="line"></span>
+    </div>
+    <div class="reminder-card">
+      <div class="rem-icon">💊</div>
+      <div>
+        <div class="rem-text">饭后30分钟服用药物</div>
+        <div class="rem-time">每日 08:00 / 14:00 / 20:00</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">首页</span>
+    </a>
+    <a href="ganglou.html" class="nav-item active">
+      <span class="nav-icon">🩹</span>
+      <span class="nav-label">肛瘘</span>
+    </a>
+    <a href="yaotu.html" class="nav-item">
+      <span class="nav-icon">🦴</span>
+      <span class="nav-label">腰突</span>
+    </a>
+    <button class="nav-item" onclick="showToast('个人中心开发中…')">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">我的</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="footer">
+    <span class="heart">♥</span>
+    <p>扶墙走 · 术后温暖陪伴</p>
+    <p style="margin-top:2px; font-size:11px;">内容仅供参考，请遵医嘱</p>
+  </footer>
+
+  <script>
+    function handleScrollAnimations() {
+      const elements = document.querySelectorAll('.fade-in');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1 });
+      elements.forEach(el => observer.observe(el));
+    }
+    handleScrollAnimations();
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>腰突术后专区 - 扶墙走</title>
+  <style>
+    :root {
+      --primary: #7EBF8E;
+      --primary-light: #C8E6CC;
+      --primary-dark: #3D7A4A;
+      --warm-bg: #F8FBF8;
+      --warm-card: #FFFFFF;
+      --text-main: #2E3D30;
+      --text-sub: #6B7E6E;
+      --text-light: #A3B5A6;
+      --accent-blue: #8BBBD9;
+      --accent-yellow: #F2C94C;
+      --accent-orange: #E8927C;
+      --shadow: 0 4px 20px rgba(126, 191, 142, 0.12);
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--warm-bg);
+      color: var(--text-main);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== Top Bar ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--warm-card);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .back-btn {
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+    .top-bar .title {
+      flex: 1;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-right: 38px;
+    }
+
+    /* ===== Page Banner ===== */
+    .page-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-banner::before {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 100px; height: 100px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+    }
+    .page-banner .banner-icon { font-size: 48px; margin-bottom: 8px; }
+    .page-banner .banner-title { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+    .page-banner .banner-sub { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 4px; }
+
+    /* ===== Section ===== */
+    .section { padding: 24px 16px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    .section-title .icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; margin-right: 10px; flex-shrink: 0;
+    }
+    .section-title .line {
+      flex: 1; height: 1px; background: var(--primary-light); margin-left: 12px;
+    }
+
+    /* ===== Recovery Timeline ===== */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 8px; bottom: 8px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--primary-light), #eee);
+      border-radius: 1px;
+    }
+    .timeline-item { position: relative; margin-bottom: 20px; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px; top: 8px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--warm-card);
+      border: 3px solid var(--primary);
+    }
+    .timeline-item.active::before {
+      background: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .timeline-item .time { font-size: 12px; color: var(--text-light); }
+    .timeline-item .event {
+      font-size: 14px; color: var(--text-main);
+      background: var(--warm-card); padding: 12px 16px;
+      border-radius: 12px; margin-top: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .timeline-item.active .event { border-left: 3px solid var(--primary); }
+
+    /* ===== Care Cards ===== */
+    .care-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .care-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .care-card:active { transform: scale(0.97); }
+    .care-card .card-icon { font-size: 36px; margin-bottom: 8px; }
+    .care-card .card-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+    .care-card .card-desc { font-size: 11px; color: var(--text-light); line-height: 1.5; }
+
+    /* ===== Tip List ===== */
+    .tip-list { display: flex; flex-direction: column; gap: 10px; }
+    .tip-item {
+      display: flex; align-items: flex-start;
+      background: var(--warm-card); border-radius: 12px;
+      padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .tip-item .tip-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--primary); margin-top: 7px; margin-right: 12px; flex-shrink: 0;
+    }
+    .tip-item .tip-content { flex: 1; }
+    .tip-item .tip-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .tip-item .tip-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+    /* ===== Notice Image Card ===== */
+    .notice-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .notice-card .notice-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .notice-card .notice-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+      background: #F0F7F2;
+    }
+    .notice-card .notice-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .notice-card img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #E0EDE2;
+    }
+    .notice-card .img-caption {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+    .notice-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px dashed #d4e8d9;
+    }
+    .notice-section:first-of-type {
+      border-top: none;
+      margin-top: 0;
+      padding-top: 0;
+    }
+    .notice-subtitle {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .notice-text {
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.7;
+      margin-bottom: 6px;
+      padding-left: 12px;
+      position: relative;
+    }
+    .notice-text::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+    .notice-list {
+      margin-bottom: 4px;
+    }
+    .notice-item {
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.7;
+      margin-bottom: 6px;
+      padding-left: 16px;
+      position: relative;
+    }
+    .notice-item::before {
+      content: '•';
+      position: absolute;
+      left: 2px;
+      color: #7CB587;
+    }
+    .warning-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #FFF3E0;
+      border-radius: 10px;
+      border-left: 4px solid #E8927C;
+      font-size: 14px;
+      color: #BF360C;
+      line-height: 1.6;
+    }
+    .tip-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #F0F7F2;
+      border-radius: 10px;
+      border-left: 4px solid #7CB587;
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    /* ===== Reminder ===== */
+    .reminder-card {
+      background: linear-gradient(135deg, #F0F7F2 0%, #E8F5EB 100%);
+      border-radius: var(--radius); padding: 20px;
+      border: 1px solid var(--primary-light);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .reminder-card .rem-icon { font-size: 28px; flex-shrink: 0; }
+    .reminder-card .rem-text { font-size: 13px; color: var(--text-main); }
+    .reminder-card .rem-time { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+    /* ===== Warning Box ===== */
+    .warning-box {
+      background: #FFF8F0;
+      border: 1px solid #FFE0B2;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 16px;
+    }
+    .warning-box .warn-header {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: #E67E22; margin-bottom: 6px;
+    }
+    .warning-box .warn-text {
+      font-size: 12px; color: #B8762D; line-height: 1.7;
+    }
+
+    /* ===== Footer ===== */
+    .footer { text-align: center; padding: 32px 16px 40px; color: var(--text-light); }
+    .footer .heart { color: var(--primary); font-size: 14px; }
+    .footer p { font-size: 12px; margin-top: 6px; }
+
+    .fade-in {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== Bottom Nav ===== */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid #e0ede2;
+      display: flex; justify-content: space-around;
+      padding: 8px 0 env(safe-area-inset-bottom, 8px);
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 4px 0; cursor: pointer; color: var(--text-light);
+      text-decoration: none; transition: color 0.2s;
+      border: none; background: none; font-family: inherit;
+    }
+    .nav-item.active, .nav-item:hover { color: var(--primary); }
+    .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
+    .nav-item .nav-label { font-size: 10px; }
+
+    .spacer { height: 70px; }
+
+    .toast {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(46, 61, 48, 0.88); color: #fff;
+      padding: 16px 28px; border-radius: 12px; font-size: 14px;
+      z-index: 200; opacity: 0; transition: all 0.3s ease;
+      pointer-events: none; text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="index.html" class="back-btn">←</a>
+    <div class="title">腰突术后专区</div>
+  </div>
+
+  <!-- Banner -->
+  <div class="page-banner">
+    <div class="banner-icon">🦴</div>
+    <div class="banner-title">腰突术后专区</div>
+    <div class="banner-sub">科学康复，重新挺直</div>
+  </div>
+
+  <!-- 椎管孔镜术后注意事项 -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#F0F7F2;">📋</span>
+      术后注意事项
+      <span class="line"></span>
+    </div>
+    <div class="notice-card">
+      <div class="notice-header">
+        <div class="notice-icon">📋</div>
+        <div class="notice-title">椎间孔镜术后注意事项</div>
+      </div>
+
+      <div class="notice-section">
+        <div class="notice-subtitle">一、如何联系到我</div>
+        <div class="notice-text">电话/微信：<strong>18810533317</strong>（易端医生）</div>
+        <div class="notice-text">方式一：微信关注<strong>北医三院服务号</strong>，选择"导诊"→在线挂号，外科→疼痛门诊→易端</div>
+        <div class="notice-text">方式二：微信扫码关注"好大夫"平台，可以直接网上联系到医生本人</div>
+        <div class="notice-text">如果挂不上号，可以来门诊加号</div>
+        <div class="notice-text">固定出诊时间：本部<strong>周一下午、周二上午、周四下午</strong></div>
+      </div>
+
+      <div class="notice-section">
+        <div class="notice-subtitle">二、腰围佩戴时间</div>
+        <div class="notice-list">
+          <div class="notice-item">躺在床上<strong>不需要</strong>佩戴腰围</div>
+          <div class="notice-item">手术后下床行走及坐立<strong>必须先佩戴</strong>腰围</div>
+          <div class="notice-item">腰围佩戴<strong>两周</strong>：之后短距离行走/短时间坐可不戴</div>
+          <div class="notice-item">行走或坐超过<strong>半小时</strong>，建议继续佩戴腰围两周</div>
+          <div class="notice-item">手术后<strong>一个月</strong>基本完全不用佩戴腰围</div>
+        </div>
+      </div>
+
+      <div class="notice-section">
+        <div class="notice-subtitle">三、运动恢复时间</div>
+        <div class="notice-list">
+          <div class="notice-item">术后 <strong>6 小时或 24 小时</strong>可第一次短时间下地行走（遵医院安排）</div>
+          <div class="notice-item"><strong>1 个月内</strong>尽量卧床休息为主，床上多做<strong>直腿抬高</strong>及<strong>勾脚运动</strong>，防止神经粘连</div>
+          <div class="notice-item"><strong>1 个月后</strong>可恢复正常生活和工作，但<strong>切忌剧烈运动</strong>（跑步、打球等）</div>
+          <div class="notice-item">腰椎不要用力，<strong>不要直接弯腰搬重物</strong></div>
+          <div class="notice-item"><strong>3 个月后</strong>复查，由医生判断是否可恢复剧烈运动</div>
+        </div>
+        <div class="warning-box">
+          ⚠️ 三个月以内<strong>都不推荐</strong>做小燕飞、臀桥练习以及五点支撑等腰背部肌肉力量锻炼！
+        </div>
+      </div>
+
+      <div class="notice-section">
+        <div class="notice-subtitle">四、术后症状恢复情况</div>
+        <div class="notice-list">
+          <div class="notice-item">大部分术前症状术后会<strong>立即消失</strong></div>
+          <div class="notice-item">可能残留腰臀部疼痛、下肢轻微疼痛/麻木/发凉等</div>
+          <div class="notice-item">这些症状可能在术后第 <strong>2～7 天</strong>才出现，属于<strong>神经反跳痛</strong>，是正常反应</div>
+          <div class="notice-item">一般到术后 <strong>3 个月</strong>上述症状基本完全消失</div>
+          <div class="notice-item">如再次出现与手术前<strong>一模一样</strong>的症状，需咨询医师</div>
+        </div>
+      </div>
+
+      <div class="notice-section">
+        <div class="notice-subtitle">五、复发问题</div>
+        <div class="notice-list">
+          <div class="notice-item">椎间孔镜术后复发概率约 <strong>5%</strong></div>
+          <div class="notice-item">如有严重终板炎、肥胖、宽基底部突出等，复发概率增加</div>
+          <div class="notice-item">过早剧烈运动、康复锻炼或弯腰都会<strong>增加复发概率</strong></div>
+          <div class="notice-item">若出现与手术前一致的症状（疼痛范围、程度一致甚至加重），需怀疑复发，做核磁检查</div>
+        </div>
+      </div>
+
+      <div class="notice-section">
+        <div class="notice-subtitle">六、术后复查</div>
+        <div class="notice-list">
+          <div class="notice-item"><strong>第一次复查</strong>：术后 2 周，需拆线（伤口约 1cm）</div>
+          <div class="notice-item"><strong>第二次复查</strong>：术后 3 个月，需复查腰椎核磁</div>
+        </div>
+        <div class="tip-box">
+          💡 核磁报告可能显示还有椎间盘突出、椎管狭窄等——<strong>不要担心</strong>！手术只切除严重压迫神经的突出，其他未压迫神经的部位会保留。<strong>重点看症状恢复情况，不要看核磁报告结果。</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recovery Timeline -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#F0F7F2;">🗓️</span>
+      恢复日程
+      <span class="line"></span>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item active">
+        <div class="time">术后当天</div>
+        <div class="event">平卧休息 · 观察下肢感觉 · 避免用力</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第1-3天</div>
+        <div class="event">可适当翻身 · 直腿抬高练习 · 预防神经根粘连</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第3-7天</div>
+        <div class="event">佩戴腰围下床活动 · 避免久坐 · 逐步行走</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第2-4周</div>
+        <div class="event">增加行走距离 · 直腿抬高练习 · 避免弯腰负重</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第1-3个月</div>
+        <div class="event">复查评估 · 逐步恢复日常活动 · 避免剧烈运动</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Care Categories -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#E8F5EB;">🩺</span>
+      养护指南
+      <span class="line"></span>
+    </div>
+    <div class="care-grid">
+      <div class="care-card" onclick="showToast('护腰指南整理中…')">
+        <div class="card-icon">🛡️</div>
+        <div class="card-title">护腰指导</div>
+        <div class="card-desc">正确佩戴腰围</div>
+      </div>
+      <div class="care-card" onclick="showToast('康复训练指南整理中…')">
+        <div class="card-icon">🏃</div>
+        <div class="card-title">康复训练</div>
+        <div class="card-desc">科学锻炼腰背肌</div>
+      </div>
+      <div class="care-card" onclick="showToast('饮食调理指南整理中…')">
+        <div class="card-icon">🍲</div>
+        <div class="card-title">饮食调理</div>
+        <div class="card-desc">补钙强骨助恢复</div>
+      </div>
+      <div class="care-card" onclick="showToast('日常注意指南整理中…')">
+        <div class="card-icon">⚠️</div>
+        <div class="card-title">日常注意</div>
+        <div class="card-desc">避免伤腰动作</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Daily Tips -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF8E7;">💡</span>
+      今日贴士
+      <span class="line"></span>
+    </div>
+    <div class="tip-list">
+      <div class="tip-item">
+        <div class="tip-dot" style="background: var(--primary);"></div>
+        <div class="tip-content">
+          <div class="tip-title">正确起卧</div>
+          <div class="tip-desc">侧卧→用手撑起→坐起→站立，避免直接仰卧起坐</div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-dot" style="background: var(--accent-blue);"></div>
+        <div class="tip-content">
+          <div class="tip-title">佩戴腰围</div>
+          <div class="tip-desc">下床活动时必须佩戴，卧床时取下</div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-dot" style="background: var(--accent-yellow);"></div>
+        <div class="tip-content">
+          <div class="tip-title">避免久坐</div>
+          <div class="tip-desc">坐位不超过30分钟，定时起身活动</div>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-dot" style="background: var(--accent-orange);"></div>
+        <div class="tip-content">
+          <div class="tip-title">直腿抬高</div>
+          <div class="tip-desc">每日练习直腿抬高，预防神经根粘连</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reminder -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF0EB;">⏰</span>
+      康复提醒
+      <span class="line"></span>
+    </div>
+    <div class="reminder-card">
+      <div class="rem-icon">🏋️</div>
+      <div>
+        <div class="rem-text">腰背肌功能锻炼（三个月后）</div>
+        <div class="rem-time">小燕飞、臀桥练习、五点支撑</div>
+        <div style="color:#c0392b;font-size:12px;margin-top:4px;">⚠️ 术后三个月内禁止做此类锻炼！三个月后经医生复查同意方可开始</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Warning -->
+  <div class="section fade-in">
+    <div class="warning-box">
+      <div class="warn-header">⚠️ 温馨提醒</div>
+      <div class="warn-text">
+        以上内容仅供康复参考，具体训练方案请遵医嘱。如出现下肢麻木加重、疼痛剧烈等异常情况，请及时就医。
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">首页</span>
+    </a>
+    <a href="ganglou.html" class="nav-item">
+      <span class="nav-icon">🩹</span>
+      <span class="nav-label">肛瘘</span>
+    </a>
+    <a href="yaotu.html" class="nav-item active">
+      <span class="nav-icon">🦴</span>
+      <span class="nav-label">腰突</span>
+    </a>
+    <button class="nav-item" onclick="showToast('个人中心开发中…')">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">我的</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="footer">
+    <span class="heart">♥</span>
+    <p>扶墙走 · 术后温暖陪伴</p>
+    <p style="margin-top:2px; font-size:11px;">内容仅供参考，请遵医嘱</p>
+  </footer>
+
+  <script>
+    function handleScrollAnimations() {
+      const elements = document.querySelectorAll('.fade-in');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1 });
+      elements.forEach(el => observer.observe(el));
+    }
+    handleScrollAnimations();
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+  </script>
+</body>
+</html>

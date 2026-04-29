@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>敷料选购指南 - 扶墙走</title>
+  <style>
+    :root {
+      --primary: #E8927C;
+      --primary-light: #F5C6B8;
+      --primary-dark: #C96B55;
+      --warm-bg: #FFF8F5;
+      --warm-card: #FFFFFF;
+      --text-main: #4A3728;
+      --text-sub: #8C7B6E;
+      --text-light: #B8A99E;
+      --accent-green: #7EBF8E;
+      --accent-blue: #8BBBD9;
+      --accent-yellow: #F2C94C;
+      --shadow: 0 4px 20px rgba(232, 146, 124, 0.12);
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--warm-bg);
+      color: var(--text-main);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== Top Bar ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--warm-card);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .back-btn {
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+    .top-bar .title {
+      flex: 1;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-right: 38px;
+    }
+
+    /* ===== Page Banner ===== */
+    .page-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-banner::before {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 100px; height: 100px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+    }
+    .page-banner .banner-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+    .page-banner .banner-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+    .page-banner .banner-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.85);
+      margin-top: 4px;
+    }
+
+    /* ===== Section ===== */
+    .section {
+      padding: 24px 16px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    .section-title .icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .section-title .line {
+      flex: 1;
+      height: 1px;
+      background: var(--primary-light);
+      margin-left: 12px;
+    }
+
+    /* ===== Product Card ===== */
+    .product-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      margin-bottom: 14px;
+    }
+    .product-card .prod-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .product-card .prod-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .product-card .prod-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .product-card .prod-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ===== Info Row ===== */
+    .info-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+    .info-row .label {
+      flex-shrink: 0;
+      background: #FFF5F0;
+      color: var(--primary-dark);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .info-row .value {
+      flex: 1;
+    }
+
+    /* ===== Price Box ===== */
+    .price-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .price-box {
+      background: #FFFAF8;
+      border: 1px solid #FFE8E0;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .price-box .price-type {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .price-box .price-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .price-box .price-unit {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-sub);
+    }
+    .price-box .price-source {
+      font-size: 10px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    /* ===== Hospital Card ===== */
+    .hospital-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .hospital-card .hosp-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .hospital-card .hosp-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .hospital-card .hosp-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .hospital-card .hosp-dept {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+    .hospital-card .hosp-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .hosp-detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+    .hosp-detail-item .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+    .hosp-detail-item strong {
+      color: var(--text-main);
+    }
+
+    /* ===== Insurance Tip ===== */
+    .insurance-tip {
+      background: linear-gradient(135deg, #F0F7F2 0%, #E8F5EB 100%);
+      border: 1px solid #C8E6CC;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 12px;
+    }
+    .insurance-tip .tip-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #3D7A4A;
+      margin-bottom: 6px;
+    }
+    .insurance-tip .tip-text {
+      font-size: 12px;
+      color: #5A8F65;
+      line-height: 1.7;
+    }
+
+    /* ===== Body Care Card ===== */
+    .care-detail-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .care-detail-card .care-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .care-detail-card .care-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      background: #FFF8E7;
+    }
+    .care-detail-card .care-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .care-detail-card .care-subtitle {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+    .care-detail-card .care-body {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.8;
+    }
+
+    /* ===== Transport Info ===== */
+    .transport-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #F0F4FF;
+      color: #5B7BD5;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    /* ===== Step List ===== */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .step-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-text {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    /* ===== Warning Box ===== */
+    .warning-box {
+      background: #FFF8F0;
+      border: 1px solid #FFE0B2;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 16px;
+    }
+    .warning-box .warn-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #E67E22;
+      margin-bottom: 6px;
+    }
+    .warning-box .warn-text {
+      font-size: 12px;
+      color: #B8762D;
+      line-height: 1.7;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align: center;
+      padding: 32px 16px 40px;
+      color: var(--text-light);
+    }
+    .footer .heart { color: var(--primary); font-size: 14px; }
+    .footer p { font-size: 12px; margin-top: 6px; }
+
+    /* ===== Scroll Animations ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Spacer ===== */
+    .spacer { height: 30px; }
+
+    /* ===== Product Image ===== */
+    .prod-images {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .prod-img-wrap {
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+    }
+    .prod-img-wrap img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #f0e8e4;
+    }
+    .prod-img-wrap .img-label {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+    .full-img-wrap {
+      margin-top: 12px;
+    }
+    .full-img-wrap img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #f0e8e4;
+    }
+    .full-img-wrap .img-label {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 4px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="ganglou.html" class="back-btn">←</a>
+    <div class="title">敷料选购指南</div>
+  </div>
+
+  <!-- Page Banner -->
+  <div class="page-banner">
+    <div class="banner-icon">🩹</div>
+    <div class="banner-title">敷料选购指南</div>
+    <div class="banner-sub">肛瘘术后护理常用敷料 & 身体调养</div>
+  </div>
+
+  <!-- ===== Section 1: 敷料 ===== -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF0EC;">🧴</span>
+      常用敷料
+      <span class="line"></span>
+    </div>
+
+    <!-- 1. 藻酸盐 -->
+    <div class="product-card">
+      <div class="prod-header">
+        <div class="prod-icon" style="background:#E8F5E9;">🌿</div>
+        <div>
+          <div class="prod-name">藻酸盐敷料</div>
+          <span class="prod-tag" style="background:#E8F5E9; color:#2E7D32;">法国原产</span>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">购买渠道</span>
+          <span class="value">苏宁易购、京东均有售</span>
+        </div>
+      </div>
+      <div class="price-grid">
+        <div class="price-box">
+          <div class="price-type">蓬松状</div>
+          <div class="price-value">65<span class="price-unit">元</span></div>
+          <div class="price-source">苏宁 · 蒙禾医疗器械</div>
+        </div>
+        <div class="price-box">
+          <div class="price-type">蓬松状</div>
+          <div class="price-value">88<span class="price-unit">元</span></div>
+          <div class="price-source">京东 · 嘉鸿保健器械</div>
+        </div>
+        <div class="price-box" style="grid-column: span 2;">
+          <div class="price-type">条状</div>
+          <div class="price-value">72<span class="price-unit">元</span></div>
+          <div class="price-source">京东 · 康爱多大药房旗舰店</div>
+        </div>
+      </div>
+      <div class="prod-images">
+        <div class="prod-img-wrap">
+          <img src="file/pdf_img_1_1.jpeg" alt="藻酸盐蓬松状">
+          <div class="img-label">蓬松状</div>
+        </div>
+        <div class="prod-img-wrap">
+          <img src="file/pdf_img_1_2.jpeg" alt="藻酸盐条状">
+          <div class="img-label">条状</div>
+        </div>
+      </div>
+      <div class="full-img-wrap">
+        <img src="file/pdf_img_1_3.jpeg" alt="藻酸盐蓬松状与条状对比">
+        <div class="img-label">蓬松状 与 条状 对比</div>
+      </div>
+    </div>
+
+    <!-- 2. 邦尔康 -->
+    <div class="product-card">
+      <div class="prod-header">
+        <div class="prod-icon" style="background:#E3F2FD;">🧴</div>
+        <div>
+          <div class="prod-name">邦尔康银锌抑菌霜</div>
+          <span class="prod-tag" style="background:#E3F2FD; color:#1565C0;">抑菌护理</span>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">购买渠道</span>
+          <span class="value">淘宝、京东、304医院（中国人民解放军总医院第一附属医院，原航天桥解放军第304医院）</span>
+        </div>
+        <div class="info-row">
+          <span class="label">网购价格</span>
+          <span class="value" style="font-weight:600; color:var(--primary-dark);">约 120 元</span>
+        </div>
+        <div class="info-row">
+          <span class="label">医院价格</span>
+          <span class="value" style="font-weight:600; color:var(--accent-green);">70+ 元</span>
+        </div>
+      </div>
+      <div class="insurance-tip">
+        <div class="tip-header">💡 医保提示</div>
+        <div class="tip-text">
+          304医院购买不能直接医保报销。需要事先将该医院选为定点医院，否则挂号费不报销。
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 银馨宁 -->
+    <div class="product-card">
+      <div class="prod-header">
+        <div class="prod-icon" style="background:#F3E5F5;">✨</div>
+        <div>
+          <div class="prod-name">银馨宁（银离子）</div>
+          <span class="prod-tag" style="background:#F3E5F5; color:#7B1FA2;">银离子敷料</span>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">购买渠道</span>
+          <span class="value">积水潭医院烧伤科</span>
+        </div>
+        <div class="info-row">
+          <span class="label">原价</span>
+          <span class="value" style="text-decoration: line-through; color:var(--text-light);">404 元</span>
+        </div>
+      </div>
+      <div class="insurance-tip">
+        <div class="tip-header">💚 医保报销</div>
+        <div class="tip-text">
+          无需选为定点医院！持医保卡到一层窗口关联后，即可挂号购买并享受报销。<br>
+          挂烧伤科，挂号费 <strong>50 元</strong>，医保报销 <strong>40 元</strong>，实际自付仅 <strong>10 元</strong>。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Section 2: 身体调养 ===== -->
+  <section class="section fade-in" id="body-care">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF8E7;">🍵</span>
+      术后身体调养
+      <span class="line"></span>
+    </div>
+
+    <div class="care-detail-card">
+      <div class="care-header">
+        <div class="care-icon">🏥</div>
+        <div>
+          <div class="care-title">北京同仁堂中医医院</div>
+          <div class="care-subtitle">中药调理 · 术后元气恢复</div>
+        </div>
+      </div>
+      <div class="care-body">
+        术后元气有损伤，可进行中药调理。北京同仁堂中医医院是术后中医调养的优质选择。
+      </div>
+      <div class="transport-badge">🚇 地铁2号线/5号线 崇文门站</div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-text">到达医院后，<strong>无需选为定点医院</strong>，可直接持医保卡就医并享受报销</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>无须关联</strong>，挂号费 30 元，医保报销 28 元</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">一层大厅服务台旁边有个大牌子，列出了<strong>当日出诊的所有医生及擅长领域</strong></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-text">选好医生后，到窗口告诉挂号人员挂哪个医生的号即可</div>
+        </div>
+      </div>
+
+      <div class="insurance-tip" style="margin-top: 16px;">
+        <div class="tip-header">📌 特别提示</div>
+        <div class="tip-text">
+          同仁堂中医医院比较特别——需要<strong>选医生挂号</strong>，不像别的医院普通号无法选医生。建议提前查看出诊牌，选对擅长术后调理的医生。
+        </div>
+      </div>
+      <div class="full-img-wrap" style="margin-top: 16px;">
+        <img src="file/pdf_img_2_1.jpeg" alt="术后身体调养参考">
+        <div class="img-label">术后身体调养参考</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Warning ===== -->
+  <div class="section fade-in">
+    <div class="warning-box">
+      <div class="warn-header">⚠️ 温馨提醒</div>
+      <div class="warn-text">
+        以上价格信息仅供参考，实际价格可能随时间变动。购买前请以医院或平台实时价格为准。敷料使用请遵医嘱，如有不适请及时就医。
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <footer class="footer">
+    <span class="heart">♥</span>
+    <p>扶墙走 · 术后温暖陪伴</p>
+    <p style="margin-top:2px; font-size:11px;">内容仅供参考，请遵医嘱</p>
+  </footer>
+
+  <script>
+    function handleScrollAnimations() {
+      const elements = document.querySelectorAll('.fade-in');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+      elements.forEach(el => observer.observe(el));
+    }
+    handleScrollAnimations();
+  </script>
+</body>
+</html>

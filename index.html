@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>扶墙走 - 术后温暖陪伴</title>
+  <style>
+    :root {
+      --primary: #E8927C;
+      --primary-light: #F5C6B8;
+      --primary-dark: #C96B55;
+      --warm-bg: #FFF8F5;
+      --warm-card: #FFFFFF;
+      --text-main: #4A3728;
+      --text-sub: #8C7B6E;
+      --text-light: #B8A99E;
+      --accent-green: #7EBF8E;
+      --accent-blue: #8BBBD9;
+      --accent-yellow: #F2C94C;
+      --shadow: 0 4px 20px rgba(232, 146, 124, 0.12);
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--warm-bg);
+      color: var(--text-main);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      padding: 48px 24px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px; left: -20px;
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+    .logo {
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 6px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+    }
+    .tagline {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 2px;
+    }
+
+    /* ===== Hero Quote ===== */
+    .hero-quote {
+      margin: -18px 16px 0;
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-quote .quote-icon {
+      font-size: 32px;
+      color: var(--primary-light);
+      line-height: 1;
+    }
+    .hero-quote .quote-text {
+      font-size: 16px;
+      color: var(--text-main);
+      margin: 8px 0;
+      font-style: italic;
+    }
+    .hero-quote .quote-author {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    /* ===== Section ===== */
+    .section {
+      padding: 24px 16px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    .section-title .icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .section-title .line {
+      flex: 1;
+      height: 1px;
+      background: var(--primary-light);
+      margin-left: 12px;
+    }
+
+    /* ===== Surgery Entry Cards ===== */
+    .surgery-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .surgery-entry {
+      display: flex;
+      align-items: center;
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .surgery-entry:active {
+      transform: scale(0.98);
+    }
+    .surgery-entry .entry-bg {
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      opacity: 0.12;
+    }
+    .surgery-entry .entry-icon {
+      font-size: 48px;
+      margin-right: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .surgery-entry .entry-info {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+    .surgery-entry .entry-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    .surgery-entry .entry-desc {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+    .surgery-entry .entry-arrow {
+      font-size: 18px;
+      color: var(--text-light);
+      position: relative;
+      z-index: 1;
+    }
+    .surgery-entry.ganglou .entry-title { color: var(--primary-dark); }
+    .surgery-entry.ganglou .entry-bg { background: var(--primary); }
+
+    .surgery-entry.yaotu .entry-title { color: #3D7A4A; }
+    .surgery-entry.yaotu .entry-bg { background: var(--accent-green); }
+
+    /* ===== Mood Tracker ===== */
+    .mood-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .mood-question {
+      font-size: 15px;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    .mood-options {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+    .mood-btn {
+      font-size: 32px;
+      background: none;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mood-btn:hover, .mood-btn.active {
+      border-color: var(--primary-light);
+      background: #FFF0EC;
+      transform: scale(1.1);
+    }
+    .mood-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+    .mood-result {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--primary);
+      display: none;
+    }
+
+    /* ===== Encouragement ===== */
+    .encourage-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 6px 24px rgba(201, 107, 85, 0.25);
+    }
+    .encourage-card .enc-emoji {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    .encourage-card .enc-text {
+      font-size: 16px;
+      line-height: 1.8;
+      font-weight: 500;
+    }
+    .encourage-card .enc-sub {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 12px;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align: center;
+      padding: 32px 16px 40px;
+      color: var(--text-light);
+    }
+    .footer .heart { color: var(--primary); font-size: 14px; }
+    .footer p { font-size: 12px; margin-top: 6px; }
+
+    /* ===== Scroll Animations ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Nav Bar ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid #f0e8e4;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 env(safe-area-inset-bottom, 8px);
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 0;
+      cursor: pointer;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: color 0.2s;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+    .nav-item.active, .nav-item:hover {
+      color: var(--primary);
+    }
+    .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
+    .nav-item .nav-label { font-size: 10px; }
+
+    .spacer { height: 70px; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(74, 55, 40, 0.88);
+      color: #fff;
+      padding: 16px 28px;
+      border-radius: 12px;
+      font-size: 14px;
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      text-align: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">扶墙走</div>
+    <div class="tagline">每一步，都算数 ✦ 术后温暖陪伴</div>
+  </header>
+
+  <!-- Hero Quote -->
+  <div class="hero-quote fade-in">
+    <div class="quote-icon">❝</div>
+    <div class="quote-text">慢慢来，比较快</div>
+    <div class="quote-author">—— 给正在恢复的你</div>
+  </div>
+
+  <!-- Surgery Type Selector -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF0EC;">🏥</span>
+      选择手术类型
+      <span class="line"></span>
+    </div>
+    <div class="surgery-cards">
+      <a href="ganglou.html" class="surgery-entry ganglou">
+        <div class="entry-bg"></div>
+        <div class="entry-icon">🩹</div>
+        <div class="entry-info">
+          <div class="entry-title">肛瘘术后</div>
+          <div class="entry-desc">伤口护理 · 敷料选购 · 恢复日程 · 身体调养</div>
+        </div>
+        <div class="entry-arrow">›</div>
+      </a>
+      <a href="yaotu.html" class="surgery-entry yaotu">
+        <div class="entry-bg"></div>
+        <div class="entry-icon">🦴</div>
+        <div class="entry-info">
+          <div class="entry-title">腰突术后</div>
+          <div class="entry-desc">康复训练 · 护腰指导 · 恢复日程 · 身体调养</div>
+        </div>
+        <div class="entry-arrow">›</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Mood Tracker -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#F0EFFF;">😊</span>
+      今日心情
+      <span class="line"></span>
+    </div>
+    <div class="mood-card">
+      <div class="mood-question">你今天感觉怎么样？</div>
+      <div class="mood-options">
+        <button class="mood-btn" onclick="selectMood(this, '很棒！继续保持 💪')">
+          😄<span class="mood-label">不错</span>
+        </button>
+        <button class="mood-btn" onclick="selectMood(this, '平稳就是进步 🌿')">
+          😌<span class="mood-label">还行</span>
+        </button>
+        <button class="mood-btn" onclick="selectMood(this, '不舒服要及时告诉家人哦 🤗')">
+          😔<span class="mood-label">难受</span>
+        </button>
+        <button class="mood-btn" onclick="selectMood(this, '累了就好好休息，明天会更好 🌙')">
+          😴<span class="mood-label">疲惫</span>
+        </button>
+      </div>
+      <div class="mood-result" id="moodResult"></div>
+    </div>
+  </section>
+
+  <!-- Encouragement -->
+  <section class="section fade-in">
+    <div class="encourage-card">
+      <div class="enc-emoji">🌻</div>
+      <div class="enc-text">
+        每一天的你都在变好<br>
+        别着急，慢慢来<br>
+        世界在等你康复
+      </div>
+      <div class="enc-sub">扶墙走 · 陪你走过每一步</div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">首页</span>
+    </button>
+    <a href="ganglou.html" class="nav-item">
+      <span class="nav-icon">🩹</span>
+      <span class="nav-label">肛瘘</span>
+    </a>
+    <a href="yaotu.html" class="nav-item">
+      <span class="nav-icon">🦴</span>
+      <span class="nav-label">腰突</span>
+    </a>
+    <button class="nav-item" onclick="showToast('个人中心开发中…')">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">我的</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="footer">
+    <span class="heart">♥</span>
+    <p>扶墙走 · 术后温暖陪伴</p>
+    <p style="margin-top:2px; font-size:11px;">内容仅供参考，请遵医嘱</p>
+  </footer>
+
+  <script>
+    function handleScrollAnimations() {
+      const elements = document.querySelectorAll('.fade-in');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1 });
+      elements.forEach(el => observer.observe(el));
+    }
+    handleScrollAnimations();
+
+    function selectMood(btn, message) {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const result = document.getElementById('moodResult');
+      result.textContent = message;
+      result.style.display = 'block';
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+  </script>
+</body>
+</html>
