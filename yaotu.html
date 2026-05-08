@@ -303,6 +303,45 @@
       font-size: 12px; color: #B8762D; line-height: 1.7;
     }
 
+    /* ===== Posture Images ===== */
+    .posture-section {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-top: 16px;
+    }
+    .posture-section .posture-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .posture-section .posture-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0; background: #FFF3E0;
+    }
+    .posture-section .posture-title {
+      font-size: 16px; font-weight: 600; color: var(--text-main);
+    }
+    .posture-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .posture-item {
+      text-align: center;
+    }
+    .posture-item img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #E0EDE2;
+    }
+    .posture-item .posture-label {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
     /* ===== Footer ===== */
     .footer { text-align: center; padding: 32px 16px 40px; color: var(--text-light); }
     .footer .heart { color: var(--primary); font-size: 14px; }
@@ -439,6 +478,45 @@
         </div>
         <div class="tip-box">
           💡 核磁报告可能显示还有椎间盘突出、椎管狭窄等——<strong>不要担心</strong>！手术只切除严重压迫神经的突出，其他未压迫神经的部位会保留。<strong>重点看症状恢复情况，不要看核磁报告结果。</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Posture Pressure -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF3E0;">📊</span>
+      姿势与腰椎压力
+      <span class="line"></span>
+    </div>
+    <div class="posture-section">
+      <div class="posture-header">
+        <div class="posture-icon">⚠️</div>
+        <div class="posture-title">不同姿势对腰椎的压力</div>
+      </div>
+      <div class="posture-grid">
+        <div class="posture-item">
+          <img src="file/yao/01.png" alt="平躺与侧躺">
+          <div class="posture-label">平躺 25% / 侧躺 75%</div>
+        </div>
+        <div class="posture-item">
+          <img src="file/yao/02.png" alt="直立与坐直">
+          <div class="posture-label">直立 100% / 坐直 140%</div>
+        </div>
+        <div class="posture-item">
+          <img src="file/yao/03.png" alt="坐着前倾与后仰">
+          <div class="posture-label">前倾 185% / 后仰 50%</div>
+        </div>
+        <div class="posture-item">
+          <img src="file/yao/04.png" alt="弯腰与抬重物">
+          <div class="posture-label">弯腰 150% / 抬重物 220%</div>
+        </div>
+      </div>
+      <div class="warning-box" style="margin-top: 14px;">
+        <div class="warn-header">💡 核心提醒</div>
+        <div class="warn-text">
+          平躺压力最小（25%），弯腰抬重物压力最大（220%）。术后应<strong>多平躺休息</strong>，避免久坐、前倾和弯腰搬重物，保护腰椎从正确姿势开始！
         </div>
       </div>
     </div>
