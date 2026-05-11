@@ -172,6 +172,136 @@
     .tip-item .tip-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
     .tip-item .tip-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
 
+    /* ===== Product Card ===== */
+    .product-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      margin-bottom: 14px;
+    }
+    .product-card .prod-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .product-card .prod-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0;
+    }
+    .product-card .prod-name {
+      font-size: 17px; font-weight: 600; color: var(--text-main);
+    }
+    .product-card .prod-tag {
+      display: inline-block; font-size: 11px;
+      padding: 2px 8px; border-radius: 6px;
+      margin-top: 4px; font-weight: 500;
+    }
+    .info-group {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .info-row {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; color: var(--text-sub); line-height: 1.6;
+    }
+    .info-row .label {
+      flex-shrink: 0; background: #FFF5F0;
+      color: var(--primary-dark); padding: 2px 8px;
+      border-radius: 6px; font-size: 11px; font-weight: 500;
+      white-space: nowrap;
+    }
+    .info-row .value { flex: 1; }
+    .prod-images {
+      display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+    }
+    .prod-img-wrap {
+      flex: 1; min-width: 120px; text-align: center;
+    }
+    .prod-img-wrap img {
+      width: 100%; border-radius: 10px; border: 1px solid #f0e8e4;
+    }
+    .prod-img-wrap .img-label,
+    .full-img-wrap .img-label {
+      font-size: 11px; color: var(--text-light); margin-top: 4px; text-align: center;
+    }
+    .full-img-wrap { margin-top: 12px; }
+    .full-img-wrap img {
+      width: 100%; border-radius: 10px; border: 1px solid #f0e8e4;
+    }
+
+    /* ===== Care Detail Card ===== */
+    .care-detail-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .care-detail-card .care-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 14px;
+    }
+    .care-detail-card .care-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0; background: #FFF8E7;
+    }
+    .care-detail-card .care-title {
+      font-size: 17px; font-weight: 600; color: var(--text-main);
+    }
+    .care-detail-card .care-subtitle {
+      font-size: 12px; color: var(--text-sub); margin-top: 2px;
+    }
+    .care-detail-card .care-body {
+      font-size: 14px; color: var(--text-sub); line-height: 1.8;
+    }
+    .step-list {
+      display: flex; flex-direction: column; gap: 10px; margin-top: 12px;
+    }
+    .step-item {
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 2px;
+    }
+    .step-text {
+      font-size: 13px; color: var(--text-sub); line-height: 1.6;
+    }
+    .insurance-tip {
+      background: linear-gradient(135deg, #F0F7F2 0%, #E8F5EB 100%);
+      border: 1px solid #C8E6CC;
+      border-radius: 12px; padding: 14px 16px; margin-top: 12px;
+    }
+    .insurance-tip .tip-header {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: #3D7A4A; margin-bottom: 6px;
+    }
+    .insurance-tip .tip-text {
+      font-size: 12px; color: #5A8F65; line-height: 1.7;
+    }
+    .transport-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #F0F4FF; color: #5B7BD5;
+      padding: 4px 10px; border-radius: 8px;
+      font-size: 12px; margin-top: 8px;
+    }
+    .warning-box {
+      background: #FFF8F0; border: 1px solid #FFE0B2;
+      border-radius: 12px; padding: 14px 16px; margin-top: 16px;
+    }
+    .warning-box .warn-header {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; color: #E67E22; margin-bottom: 6px;
+    }
+    .warning-box .warn-text {
+      font-size: 12px; color: #B8762D; line-height: 1.7;
+    }
+
     /* ===== Reminder ===== */
     .reminder-card {
       background: linear-gradient(135deg, #FFF5F0 0%, #FFF0EB 100%);
@@ -274,33 +404,150 @@
     </div>
   </section>
 
-  <!-- Care Categories -->
+  <!-- 敷料选购 & 身体调养 -->
   <section class="section fade-in">
     <div class="section-title">
-      <span class="icon" style="background:#F0F7F2;">🩺</span>
-      养护指南
+      <span class="icon" style="background:#F0F7F2;">🩹</span>
+      敷料选购指南
       <span class="line"></span>
     </div>
-    <div class="care-grid">
-      <a href="guide.html" class="care-card">
-        <div class="card-icon">🩹</div>
-        <div class="card-title">伤口护理</div>
-        <div class="card-desc">敷料选购指南</div>
-      </a>
-      <a href="guide.html#body-care" class="care-card">
-        <div class="card-icon">🍵</div>
-        <div class="card-title">身体调养</div>
-        <div class="card-desc">中药调理恢复元气</div>
-      </a>
-      <div class="care-card" onclick="showToast('饮食调理指南整理中…')">
-        <div class="card-icon">🍲</div>
-        <div class="card-title">饮食调理</div>
-        <div class="card-desc">科学饮食助力恢复</div>
+
+    <!-- 藻酸盐 -->
+    <div class="product-card">
+      <div class="prod-header">
+        <div class="prod-icon" style="background:#E8F5E9;">🌿</div>
+        <div>
+          <div class="prod-name">藻酸盐敷料</div>
+        </div>
       </div>
-      <div class="care-card" onclick="showToast('心理调适指南整理中…')">
-        <div class="card-icon">🧠</div>
-        <div class="card-title">心理调适</div>
-        <div class="card-desc">保持乐观静待花开</div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">购买渠道</span>
+          <span class="value">苏宁易购、京东均有售</span>
+        </div>
+      </div>
+      <div class="prod-images">
+        <div class="prod-img-wrap">
+          <img src="file/pdf_img_1_1.jpeg" alt="藻酸盐蓬松状">
+          <div class="img-label">蓬松状</div>
+        </div>
+        <div class="prod-img-wrap">
+          <img src="file/pdf_img_1_2.jpeg" alt="藻酸盐条状">
+          <div class="img-label">条状</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 邦尔康 -->
+    <div class="product-card">
+      <div class="prod-header">
+        <div class="prod-icon" style="background:#E3F2FD;">🧴</div>
+        <div>
+          <div class="prod-name">邦尔康银锌抑菌霜</div>
+          <span class="prod-tag" style="background:#E3F2FD; color:#1565C0;">抑菌护理</span>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">购买渠道</span>
+          <span class="value">淘宝、京东、304医院（中国人民解放军总医院第一附属医院）</span>
+        </div>
+        <div class="info-row">
+          <span class="label">网购价格</span>
+          <span class="value" style="font-weight:600; color:var(--primary-dark);">约 120 元</span>
+        </div>
+        <div class="info-row">
+          <span class="label">医院价格</span>
+          <span class="value" style="font-weight:600; color:var(--accent-green);">70+ 元</span>
+        </div>
+      </div>
+      <div class="insurance-tip">
+        <div class="tip-header">💡 医保提示</div>
+        <div class="tip-text">
+          304医院购买不能直接医保报销。需要事先将该医院选为定点医院，否则挂号费不报销。
+        </div>
+      </div>
+      <div class="full-img-wrap">
+        <img src="file/pdf_img_1_3.jpeg" alt="邦尔康银锌抑菌霜">
+        <div class="img-label">邦尔康银锌抑菌霜</div>
+      </div>
+    </div>
+
+    <!-- 银馨宁 -->
+    <div class="product-card">
+      <div class="prod-header">
+        <div class="prod-icon" style="background:#F3E5F5;">✨</div>
+        <div>
+          <div class="prod-name">银馨宁（银离子）</div>
+          <span class="prod-tag" style="background:#F3E5F5; color:#7B1FA2;">银离子敷料</span>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">购买渠道</span>
+          <span class="value">积水潭医院烧伤科</span>
+        </div>
+        <div class="info-row">
+          <span class="label">原价</span>
+          <span class="value" style="text-decoration: line-through; color:var(--text-light);">404 元</span>
+        </div>
+      </div>
+      <div class="insurance-tip">
+        <div class="tip-header">💚 医保报销</div>
+        <div class="tip-text">
+          无需选为定点医院！持医保卡到一层窗口关联后，即可挂号购买并享受报销。<br>
+          挂烧伤科，挂号费 <strong>50 元</strong>，医保报销 <strong>40 元</strong>，实际自付仅 <strong>10 元</strong>。
+        </div>
+      </div>
+      <div class="full-img-wrap">
+        <img src="file/pdf_img_2_1.jpeg" alt="银馨宁银离子敷料">
+        <div class="img-label">银馨宁（银离子）敷料</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 术后身体调养 -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF8E7;">🍵</span>
+      术后身体调养
+      <span class="line"></span>
+    </div>
+    <div class="care-detail-card">
+      <div class="care-header">
+        <div class="care-icon">🏥</div>
+        <div>
+          <div class="care-title">北京同仁堂中医医院</div>
+          <div class="care-subtitle">中药调理 · 术后元气恢复</div>
+        </div>
+      </div>
+      <div class="care-body">
+        术后元气有损伤，可进行中药调理。北京同仁堂中医医院是术后中医调养的优质选择。
+      </div>
+      <div class="transport-badge">🚇 地铁2号线/5号线 崇文门站</div>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-text">到达医院后，<strong>无需选为定点医院</strong>，可直接持医保卡就医并享受报销</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>无须关联</strong>，挂号费 30 元，医保报销 28 元</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">一层大厅服务台旁边有个大牌子，列出了<strong>当日出诊的所有医生及擅长领域</strong></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-text">选好医生后，到窗口告诉挂号人员挂哪个医生的号即可</div>
+        </div>
+      </div>
+      <div class="insurance-tip" style="margin-top: 16px;">
+        <div class="tip-header">📌 特别提示</div>
+        <div class="tip-text">
+          同仁堂中医医院比较特别——需要<strong>选医生挂号</strong>，不像别的医院普通号无法选医生。建议提前查看出诊牌，选对擅长术后调理的医生。
+        </div>
       </div>
     </div>
   </section>
