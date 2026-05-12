@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>扶墙走 - 术后温暖陪伴</title>
+  <!-- 51.la 统计代码 -->
+  <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
+  <script>LA.init({id:"3PuWUDhJLNlsGVrC",ck:"3PuWUDhJLNlsGVrC"})</script>
   <style>
     :root {
       --primary: #E8927C;
@@ -263,7 +266,7 @@
     /* ===== Footer ===== */
     .footer {
       text-align: center;
-      padding: 32px 16px 40px;
+      padding: 16px 16px 90px;
       color: var(--text-light);
     }
     .footer .heart { color: var(--primary); font-size: 14px; }
@@ -316,7 +319,7 @@
     .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
     .nav-item .nav-label { font-size: 10px; }
 
-    .spacer { height: 70px; }
+    .spacer { height: 6px; }
 
     /* ===== Toast ===== */
     .toast {
@@ -364,7 +367,7 @@
       <span class="line"></span>
     </div>
     <div class="surgery-cards">
-      <a href="ganglou.html" class="surgery-entry ganglou">
+      <a href="ganglou.html" class="surgery-entry ganglou" onclick="trackClick('enter_ganglou','肛瘘术后入口')">
         <div class="entry-bg"></div>
         <div class="entry-icon">🩹</div>
         <div class="entry-info">
@@ -373,7 +376,7 @@
         </div>
         <div class="entry-arrow">›</div>
       </a>
-      <a href="yaotu.html" class="surgery-entry yaotu">
+      <a href="yaotu.html" class="surgery-entry yaotu" onclick="trackClick('enter_yaotu','腰突术后入口')">
         <div class="entry-bg"></div>
         <div class="entry-icon">🦴</div>
         <div class="entry-info">
@@ -395,16 +398,16 @@
     <div class="mood-card">
       <div class="mood-question">你今天感觉怎么样？</div>
       <div class="mood-options">
-        <button class="mood-btn" onclick="selectMood(this, '很棒！继续保持 💪')">
+        <button class="mood-btn" onclick="selectMood(this, '很棒！继续保持 💪'); trackClick('mood','不错')">
           😄<span class="mood-label">不错</span>
         </button>
-        <button class="mood-btn" onclick="selectMood(this, '平稳就是进步 🌿')">
+        <button class="mood-btn" onclick="selectMood(this, '平稳就是进步 🌿'); trackClick('mood','还行')">
           😌<span class="mood-label">还行</span>
         </button>
-        <button class="mood-btn" onclick="selectMood(this, '不舒服要及时告诉家人哦 🤗')">
+        <button class="mood-btn" onclick="selectMood(this, '不舒服要及时告诉家人哦 🤗'); trackClick('mood','难受')">
           😔<span class="mood-label">难受</span>
         </button>
-        <button class="mood-btn" onclick="selectMood(this, '累了就好好休息，明天会更好 🌙')">
+        <button class="mood-btn" onclick="selectMood(this, '累了就好好休息，明天会更好 🌙'); trackClick('mood','疲惫')">
           😴<span class="mood-label">疲惫</span>
         </button>
       </div>
@@ -429,19 +432,19 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <button class="nav-item active">
+    <button class="nav-item active" onclick="trackClick('nav','首页')">
       <span class="nav-icon">🏠</span>
       <span class="nav-label">首页</span>
     </button>
-    <a href="ganglou.html" class="nav-item">
+    <a href="ganglou.html" class="nav-item" onclick="trackClick('nav','肛瘘')">
       <span class="nav-icon">🩹</span>
       <span class="nav-label">肛瘘</span>
     </a>
-    <a href="yaotu.html" class="nav-item">
+    <a href="yaotu.html" class="nav-item" onclick="trackClick('nav','腰突')">
       <span class="nav-icon">🦴</span>
       <span class="nav-label">腰突</span>
     </a>
-    <button class="nav-item" onclick="showToast('个人中心开发中…')">
+    <button class="nav-item" onclick="showToast('个人中心开发中…'); trackClick('nav','我的')">
       <span class="nav-icon">👤</span>
       <span class="nav-label">我的</span>
     </button>
@@ -456,6 +459,10 @@
   </footer>
 
   <script>
+    function trackClick(event, label) {
+      try { LA.track(event, { label: label, page: '首页' }); } catch(e) {}
+    }
+
     function handleScrollAnimations() {
       const elements = document.querySelectorAll('.fade-in');
       const observer = new IntersectionObserver((entries) => {
@@ -466,6 +473,19 @@
       elements.forEach(el => observer.observe(el));
     }
     handleScrollAnimations();
+
+    // 追踪各板块曝光
+    var sectionObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var title = entry.target.querySelector('.section-title');
+          var name = title ? title.textContent.trim() : '';
+          if (name) { trackClick('section_view', name); }
+          sectionObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.section').forEach(function(s) { sectionObs.observe(s); });
 
     function selectMood(btn, message) {
       document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));

@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>肛瘘术后专区 - 扶墙走</title>
+  <!-- 51.la 统计代码 -->
+  <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
+  <script>LA.init({id:"3PuWUDhJLNlsGVrC",ck:"3PuWUDhJLNlsGVrC"})</script>
   <style>
     :root {
       --primary: #E8927C;
@@ -314,7 +317,7 @@
     .reminder-card .rem-time { font-size: 11px; color: var(--text-light); margin-top: 2px; }
 
     /* ===== Footer ===== */
-    .footer { text-align: center; padding: 32px 16px 40px; color: var(--text-light); }
+    .footer { text-align: center; padding: 16px 16px 90px; color: var(--text-light); }
     .footer .heart { color: var(--primary); font-size: 14px; }
     .footer p { font-size: 12px; margin-top: 6px; }
 
@@ -345,7 +348,7 @@
     .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
     .nav-item .nav-label { font-size: 10px; }
 
-    .spacer { height: 70px; }
+    .spacer { height: 16px; }
 
     .toast {
       position: fixed; top: 50%; left: 50%;
@@ -362,7 +365,7 @@
 
   <!-- Top Bar -->
   <div class="top-bar">
-    <a href="index.html" class="back-btn">←</a>
+    <a href="index.html" class="back-btn" onclick="trackClick('back','返回首页')">←</a>
     <div class="title">肛瘘术后专区</div>
   </div>
 
@@ -372,37 +375,6 @@
     <div class="banner-title">肛瘘术后专区</div>
     <div class="banner-sub">细心护理，静待愈合</div>
   </div>
-
-  <!-- Recovery Timeline -->
-  <section class="section fade-in">
-    <div class="section-title">
-      <span class="icon" style="background:#FFF0EC;">🗓️</span>
-      恢复日程
-      <span class="line"></span>
-    </div>
-    <div class="timeline">
-      <div class="timeline-item active">
-        <div class="time">今天</div>
-        <div class="event">按时服药 · 适量走动 · 补充水分</div>
-      </div>
-      <div class="timeline-item">
-        <div class="time">第3天</div>
-        <div class="event">伤口换药 · 观察恢复情况</div>
-      </div>
-      <div class="timeline-item">
-        <div class="time">第7天</div>
-        <div class="event">复查日 · 拆线评估</div>
-      </div>
-      <div class="timeline-item">
-        <div class="time">第14天</div>
-        <div class="event">逐步增加活动量 · 饮食调整</div>
-      </div>
-      <div class="timeline-item">
-        <div class="time">第30天</div>
-        <div class="event">全面复查 · 评估康复进度</div>
-      </div>
-    </div>
-  </section>
 
   <!-- 敷料选购 & 身体调养 -->
   <section class="section fade-in">
@@ -489,7 +461,7 @@
         </div>
         <div class="info-row">
           <span class="label">原价</span>
-          <span class="value" style="text-decoration: line-through; color:var(--text-light);">404 元</span>
+          <span class="value" style="color:var(--text-light);">404 元</span>
         </div>
       </div>
       <div class="insurance-tip">
@@ -548,6 +520,37 @@
         <div class="tip-text">
           同仁堂中医医院比较特别——需要<strong>选医生挂号</strong>，不像别的医院普通号无法选医生。建议提前查看出诊牌，选对擅长术后调理的医生。
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recovery Timeline -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#FFF0EC;">🗓️</span>
+      恢复日程
+      <span class="line"></span>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item active">
+        <div class="time">今天</div>
+        <div class="event">按时服药 · 适量走动 · 补充水分</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第3天</div>
+        <div class="event">伤口换药 · 观察恢复情况</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第7天</div>
+        <div class="event">复查日 · 拆线评估</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第14天</div>
+        <div class="event">逐步增加活动量 · 饮食调整</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第30天</div>
+        <div class="event">全面复查 · 评估康复进度</div>
       </div>
     </div>
   </section>
@@ -611,19 +614,19 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <a href="index.html" class="nav-item">
+    <a href="index.html" class="nav-item" onclick="trackClick('nav','首页')">
       <span class="nav-icon">🏠</span>
       <span class="nav-label">首页</span>
     </a>
-    <a href="ganglou.html" class="nav-item active">
+    <a href="ganglou.html" class="nav-item active" onclick="trackClick('nav','肛瘘')">
       <span class="nav-icon">🩹</span>
       <span class="nav-label">肛瘘</span>
     </a>
-    <a href="yaotu.html" class="nav-item">
+    <a href="yaotu.html" class="nav-item" onclick="trackClick('nav','腰突')">
       <span class="nav-icon">🦴</span>
       <span class="nav-label">腰突</span>
     </a>
-    <button class="nav-item" onclick="showToast('个人中心开发中…')">
+    <button class="nav-item" onclick="showToast('个人中心开发中…'); trackClick('nav','我的')">
       <span class="nav-icon">👤</span>
       <span class="nav-label">我的</span>
     </button>
@@ -638,6 +641,10 @@
   </footer>
 
   <script>
+    function trackClick(event, label) {
+      try { LA.track(event, { label: label, page: '肛瘘专区' }); } catch(e) {}
+    }
+
     function handleScrollAnimations() {
       const elements = document.querySelectorAll('.fade-in');
       const observer = new IntersectionObserver((entries) => {
@@ -648,6 +655,19 @@
       elements.forEach(el => observer.observe(el));
     }
     handleScrollAnimations();
+
+    // 追踪各板块曝光
+    var sectionObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var title = entry.target.querySelector('.section-title');
+          var name = title ? title.textContent.trim() : '';
+          if (name) { trackClick('section_view', name); }
+          sectionObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.section').forEach(function(s) { sectionObs.observe(s); });
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
