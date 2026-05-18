@@ -448,6 +448,15 @@
       width: 100%; height: 240px; border-radius: 12px;
       overflow: hidden; margin-top: 14px; border: 1px solid #E0EDE2;
     }
+    .nav-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 10px; margin-top: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: #fff; font-size: 13px; font-weight: 600;
+      border: none; border-radius: 10px; cursor: pointer;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    .nav-btn:hover, .nav-btn:active { opacity: 0.9; }
   </style>
 </head>
 <body>
@@ -773,6 +782,8 @@
         </div>
       </div>
       <div class="map-container" id="fengshengMap"></div>
+      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.3728,39.9235&name=北京丰盛骨科专科医院&coordinate=gaode&callnative=1"
+         target="_blank">🧭 一键导航</a>
     </div>
 
     <!-- 手术治疗 - 北医三院 -->
@@ -792,6 +803,8 @@
         </div>
       </div>
       <div class="map-container" id="beiyi3Map"></div>
+      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.3561,39.9847&name=北京大学第三医院&coordinate=gaode&callnative=1"
+         target="_blank">🧭 一键导航</a>
     </div>
 
     <!-- 手术治疗 - 积水潭医院 -->
@@ -810,6 +823,8 @@
         </div>
       </div>
       <div class="map-container" id="jishuitanMap2"></div>
+      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.3744,39.9363&name=北京积水潭医院新街口院区&coordinate=gaode&callnative=1"
+         target="_blank">🧭 一键导航</a>
     </div>
   </section>
 
