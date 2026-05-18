@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>腰突术后专区 - 扶墙走</title>
+  <!-- 腾讯地图 JS API -->
+  <script src="https://map.qq.com/api/gljs?v=1.exp&key=PDPBZ-DKAKZ-HVDXH-T6MHX-PHCZE-ETFNX"></script>
   <!-- 51.la 统计代码（仅线上环境加载，本地 file:// 不加载避免卡顿） -->
   <script>
     if (location.protocol !== 'file:') {
@@ -395,6 +397,57 @@
       pointer-events: none; text-align: center;
     }
     .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    /* ===== Hospital Card ===== */
+    .care-detail-card {
+      background: var(--warm-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .care-detail-card .care-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 14px;
+    }
+    .care-detail-card .care-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0;
+    }
+    .care-detail-card .care-title {
+      font-size: 17px; font-weight: 600; color: var(--text-main);
+    }
+    .care-detail-card .care-subtitle {
+      font-size: 12px; color: var(--text-sub); margin-top: 2px;
+    }
+    .care-detail-card .care-body {
+      font-size: 14px; color: var(--text-sub); line-height: 1.8;
+    }
+    .info-group {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .info-row {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; color: var(--text-sub); line-height: 1.6;
+    }
+    .info-row .label {
+      flex-shrink: 0; background: #F0F7F2;
+      color: var(--primary-dark); padding: 2px 8px;
+      border-radius: 6px; font-size: 11px; font-weight: 500;
+      white-space: nowrap;
+    }
+    .info-row .value { flex: 1; }
+    .hospital-tag {
+      display: inline-block; font-size: 11px; padding: 3px 10px;
+      border-radius: 6px; font-weight: 500; margin-bottom: 10px;
+    }
+
+    /* ===== Map ===== */
+    .map-container {
+      width: 100%; height: 240px; border-radius: 12px;
+      overflow: hidden; margin-top: 14px; border: 1px solid #E0EDE2;
+    }
   </style>
 </head>
 <body>
@@ -696,6 +749,70 @@
     </div>
   </div>
 
+  <!-- 知名就诊医院 -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#E8F5EB;">🏥</span>
+      知名就诊医院
+      <span class="line"></span>
+    </div>
+
+    <!-- 保守治疗 - 北京丰盛骨科专科医院 -->
+    <div class="care-detail-card">
+      <div class="care-header">
+        <div class="care-icon" style="background:#F0F7F2;">🏥</div>
+        <div>
+          <div class="care-title">北京丰盛骨科专科医院</div>
+          <div class="hospital-tag" style="background:#E8F5EB;color:#3D7A4A;">保守治疗</div>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">📍 地址</span>
+          <span class="value">北京市西城区阜内大街306号</span>
+        </div>
+      </div>
+      <div class="map-container" id="fengshengMap"></div>
+    </div>
+
+    <!-- 手术治疗 - 北医三院 -->
+    <div class="care-detail-card">
+      <div class="care-header">
+        <div class="care-icon" style="background:#FFF0EC;">🏥</div>
+        <div>
+          <div class="care-title">北京大学第三医院</div>
+          <div class="hospital-tag" style="background:#FFE8DF;color:#C96B55;">手术治疗</div>
+          <div class="care-subtitle" style="margin-top:2px;">有多个院区</div>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">📍 地址</span>
+          <span class="value">北京市海淀区花园北路49号</span>
+        </div>
+      </div>
+      <div class="map-container" id="beiyi3Map"></div>
+    </div>
+
+    <!-- 手术治疗 - 积水潭医院 -->
+    <div class="care-detail-card">
+      <div class="care-header">
+        <div class="care-icon" style="background:#E3F2FD;">🏥</div>
+        <div>
+          <div class="care-title">首都医科大学附属北京积水潭医院</div>
+          <div class="hospital-tag" style="background:#FFE8DF;color:#C96B55;">手术治疗</div>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <span class="label">📍 地址</span>
+          <span class="value">北京市西城区新街口东街31号</span>
+        </div>
+      </div>
+      <div class="map-container" id="jishuitanMap2"></div>
+    </div>
+  </section>
+
   <div class="spacer"></div>
 
   <!-- Bottom Navigation -->
@@ -761,6 +878,29 @@
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 1800);
     }
+
+    // 初始化医院地图
+    function initHospitalMap(id, lat, lng, title, sub) {
+      var el = document.getElementById(id);
+      if (!el || typeof TMap === 'undefined') return;
+      var center = new TMap.LatLng(lat, lng);
+      var map = new TMap.Map(el, { center: center, zoom: 16, viewMode: '2D' });
+      new TMap.MultiMarker({
+        map: map,
+        styles: { marker: new TMap.MarkerStyle({ width: 24, height: 34, anchor: { x: 12, y: 34 } }) },
+        geometries: [{ id: 'h', position: center }]
+      });
+      new TMap.InfoWindow({
+        map: map, position: center,
+        content: '<div style="padding:10px;font-size:13px;color:#333;"><b>' + title + '</b><br><span style="color:#888;font-size:11px;">' + sub + '</span></div>',
+        offset: { y: -36 }
+      });
+    }
+    setTimeout(function() {
+      initHospitalMap('fengshengMap',   39.9235, 116.3728, '北京丰盛骨科专科医院', '西城区阜内大街306号');
+      initHospitalMap('beiyi3Map',     39.9847, 116.3561, '北京大学第三医院',     '海淀区花园北路49号');
+      initHospitalMap('jishuitanMap2', 39.9363, 116.3744, '北京积水潭医院',       '西城区新街口东街31号');
+    }, 1000);
   </script>
 </body>
 </html>

@@ -14,6 +14,9 @@
       s.onload = function() { LA.init({id:"3PuWUDhJLNlsGVrC",ck:"3PuWUDhJLNlsGVrC"}); };
     }
   </script>
+  <!-- 腾讯地图 JS API -->
+  <script src="https://map.qq.com/api/gljs?v=1.exp&key=PDPBZ-DKAKZ-HVDXH-T6MHX-PHCZE-ETFNX"></script>
+
   <style>
     :root {
       --primary: #E8927C;
@@ -312,6 +315,12 @@
       font-size: 12px; color: #B8762D; line-height: 1.7;
     }
 
+    /* ===== Map ===== */
+    .map-container {
+      width: 100%; height: 260px; border-radius: 12px;
+      overflow: hidden; margin-top: 16px; border: 1px solid #f0e8e4;
+    }
+
     /* ===== Reminder ===== */
     .reminder-card {
       background: linear-gradient(135deg, #FFF5F0 0%, #FFF0EB 100%);
@@ -528,8 +537,10 @@
           同仁堂中医医院比较特别——需要<strong>选医生挂号</strong>，不像别的医院普通号无法选医生。建议提前查看出诊牌，选对擅长术后调理的医生。
         </div>
       </div>
-    </div>
-  </section>
+
+      <!-- 地图 -->
+      <div class="map-container" id="tongrentangMap"></div>
+    </div>  </section>
 
   <!-- 饮食建议 -->
   <section class="section fade-in">
@@ -651,6 +662,54 @@
     </div>
   </section>
 
+  <!-- 肛肠病诊治专科医院 -->
+  <section class="section fade-in">
+    <div class="section-title">
+      <span class="icon" style="background:#E8F5EB;">🏥</span>
+      肛肠病诊治专科医院
+      <span class="line"></span>
+    </div>
+    <div class="care-detail-card">
+      <div class="care-header">
+        <div class="care-icon">🏥</div>
+        <div>
+          <div class="care-title">北京市肛肠医院</div>
+          <div class="care-subtitle">(北京市二龙路医院)北院区 · 三级甲等中西医结合</div>
+        </div>
+      </div>
+      <div class="care-body">
+        是全国最大的以诊治各种复杂、疑难和重症<strong>肛肠疾病</strong>为特色的三级甲等中西医结合医院。创立于1937年，总建筑面积2.68万平方米，开放床位400张，开设18个临床科室，14个医技科室，年门诊量70万，手术量13000余例次。<br><br>
+        21种拥有自主知识产权特色品牌自制剂临床应用50余年，服务患者近千万人次。
+      </div>
+
+      <!-- 医院信息 -->
+      <div class="info-group" style="margin-top:14px;">
+        <div class="info-row">
+          <span class="label">📍 地址</span>
+          <span class="value">北京市西城区德外大街16号（北院区）</span>
+        </div>
+        <div class="info-row">
+          <span class="label">📞 电话</span>
+          <span class="value"><a href="tel:010-57763114" style="color:var(--primary);text-decoration:none;">010-57763114</a></span>
+        </div>
+        <div class="info-row">
+          <span class="label">🌐 官网</span>
+          <span class="value"><a href="https://www.ellhospital.cn/Html/Hospitals/Main/Description.html" target="_blank" style="color:var(--accent-blue);text-decoration:none;">点击访问</a></span>
+        </div>
+      </div>
+
+      <div class="insurance-tip" style="margin-top:12px;">
+        <div class="tip-header">⭐ 医院优势</div>
+        <div class="tip-text">
+          全国最大肛肠专科 · 三级甲等 · 中西医结合 · 80余年历史
+        </div>
+      </div>
+
+      <!-- 地图 -->
+      <div class="map-container" id="gchangMap"></div>
+    </div>
+  </section>
+
   <div class="spacer"></div>
 
   <!-- Bottom Navigation -->
@@ -715,6 +774,63 @@
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    // 初始化同仁堂地图
+    function initTongrentangMap() {
+      var mapEl = document.getElementById('tongrentangMap');
+      if (!mapEl || typeof TMap === 'undefined') return;
+      var center = new TMap.LatLng(39.898527, 116.426917);
+      var map = new TMap.Map(mapEl, {
+        center: center,
+        zoom: 16,
+        viewMode: '2D'
+      });
+      // 添加医院标记
+      var marker = new TMap.MultiMarker({
+        map: map,
+        styles: {
+          marker: new TMap.MarkerStyle({
+            width: 24, height: 34, anchor: { x: 12, y: 34 }
+          })
+        },
+        geometries: [{
+          id: 'hospital', position: center
+        }]
+      });
+      // 信息窗口
+      var infoWindow = new TMap.InfoWindow({
+        map: map, position: center,
+        content: '<div style="padding:10px;font-size:13px;color:#333;"><b>北京同仁堂中医医院</b><br><span style="color:#888;font-size:11px;">地铁2/5号线 崇文门站</span></div>',
+        offset: { y: -36 }
+      });
+    }
+    // 等待地图容器可见后再初始化（避免尺寸为0）
+    setTimeout(initTongrentangMap, 800);
+    setTimeout(initGchangMap, 1000);
+
+    // 初始化北京市肛肠医院地图
+    function initGchangMap() {
+      var mapEl = document.getElementById('gchangMap');
+      if (!mapEl || typeof TMap === 'undefined') return;
+      var center = new TMap.LatLng(39.946, 116.371);
+      var map = new TMap.Map(mapEl, {
+        center: center,
+        zoom: 16,
+        viewMode: '2D'
+      });
+      var marker = new TMap.MultiMarker({
+        map: map,
+        styles: {
+          marker: new TMap.MarkerStyle({ width: 24, height: 34, anchor: { x: 12, y: 34 } })
+        },
+        geometries: [{ id: 'hospital', position: center }]
+      });
+      var infoWindow = new TMap.InfoWindow({
+        map: map, position: center,
+        content: '<div style="padding:10px;font-size:13px;color:#333;"><b>北京市肛肠医院</b><br><span style="color:#888;font-size:11px;">西城区德外大街16号 北院区</span></div>',
+        offset: { y: -36 }
+      });
     }
   </script>
 </body>
