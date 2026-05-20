@@ -445,18 +445,58 @@
 
     /* ===== Map ===== */
     .map-container {
-      width: 100%; height: 240px; border-radius: 12px;
-      overflow: hidden; margin-top: 14px; border: 1px solid #E0EDE2;
+      width: 100%; height: 260px; border-radius: 12px;
+      overflow: hidden; margin-top: 16px; border: 1px solid #f0e8e4;
     }
     .nav-btn {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      width: 100%; padding: 10px; margin-top: 8px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 10px;
+      height: 30px !important;
+      background: linear-gradient(135deg, #5DB87C 0%, #7ED09A 100%);
       color: #fff; font-size: 13px; font-weight: 600;
-      border: none; border-radius: 10px; cursor: pointer;
-      text-decoration: none; transition: opacity 0.2s;
+      border: none; border-radius: 10px;
+      cursor: pointer; text-decoration: none;
+      transition: opacity 0.2s;
+      user-select: none; -webkit-user-select: none;
     }
     .nav-btn:hover, .nav-btn:active { opacity: 0.9; }
+
+    /* ===== Nav Choice Panel ===== */
+    .nav-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45); z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-panel {
+      background: #fff; border-radius: 16px; width: 82%; max-width: 320px;
+      padding: 24px 20px 20px; text-align: center;
+      transform: scale(0.85); transition: transform 0.25s ease;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+    .nav-overlay.show .nav-panel { transform: scale(1); }
+    .nav-panel-title {
+      font-size: 16px; font-weight: 600; color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    .nav-panel-list {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .nav-panel-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;
+      border: none; cursor: pointer; text-decoration: none; transition: opacity 0.2s;
+      color: #fff;
+    }
+    .nav-panel-btn:hover, .nav-panel-btn:active { opacity: 0.88; }
+    .nav-panel-btn.gaode   { background: linear-gradient(135deg, #3E8EF7 0%, #5BA3F8 100%); }
+    .nav-panel-btn.baidu  { background: linear-gradient(135deg, #3388FF 0%, #55A0FF 100%); }
+    .nav-panel-btn.tencent { background: linear-gradient(135deg, #07C160 0%, #2DD470 100%); }
+    .nav-panel-cancel {
+      margin-top: 14px; padding: 10px; border: none; background: none;
+      font-size: 13px; color: var(--text-light); cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -782,8 +822,7 @@
         </div>
       </div>
       <div class="map-container" id="fengshengMap"></div>
-      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.3728,39.9235&name=北京丰盛骨科专科医院&coordinate=gaode&callnative=1"
-         target="_blank">🧭 一键导航</a>
+      <div class="nav-btn" onclick="showNavChoice(39.9235,116.3728,'北京丰盛骨科专科医院')">🧭 一键导航</div>
     </div>
 
     <!-- 手术治疗 - 北医三院 -->
@@ -803,8 +842,7 @@
         </div>
       </div>
       <div class="map-container" id="beiyi3Map"></div>
-      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.3561,39.9847&name=北京大学第三医院&coordinate=gaode&callnative=1"
-         target="_blank">🧭 一键导航</a>
+      <div class="nav-btn" onclick="showNavChoice(39.9847,116.3561,'北京大学第三医院')">🧭 一键导航</div>
     </div>
 
     <!-- 手术治疗 - 积水潭医院 -->
@@ -823,8 +861,7 @@
         </div>
       </div>
       <div class="map-container" id="jishuitanMap2"></div>
-      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.3744,39.9363&name=北京积水潭医院新街口院区&coordinate=gaode&callnative=1"
-         target="_blank">🧭 一键导航</a>
+      <div class="nav-btn" onclick="showNavChoice(39.9363,116.3744,'北京积水潭医院新街口院区')">🧭 一键导航</div>
     </div>
   </section>
 
@@ -851,6 +888,15 @@
   </nav>
 
   <div class="toast" id="toast"></div>
+
+  <!-- 导航选择面板 -->
+  <div class="nav-overlay" id="navOverlay" onclick="hideNavChoice(event)">
+    <div class="nav-panel" onclick="event.stopPropagation()">
+      <div class="nav-panel-title">选择导航方式</div>
+      <div class="nav-panel-list" id="navPanelList"></div>
+      <button class="nav-panel-cancel" onclick="hideNavChoice()">取消</button>
+    </div>
+  </div>
 
   <footer class="footer">
     <span class="heart">♥</span>
@@ -892,6 +938,20 @@
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    // 导航选择面板
+    function showNavChoice(lat, lng, name) {
+      var list = document.getElementById('navPanelList');
+      list.innerHTML =
+        '<a class="nav-panel-btn gaode"   href="https://uri.amap.com/marker?position=' + lng + ',' + lat + '&name=' + encodeURIComponent(name) + '&coordinate=gaode&callnative=1" target="_blank">🗺️ 高德地图</a>' +
+        '<a class="nav-panel-btn baidu"   href="http://api.map.baidu.com/marker?location=' + lat + ',' + lng + '&title=' + encodeURIComponent(name) + '&content=&output=html" target="_blank">🧭 百度地图</a>' +
+        '<a class="nav-panel-btn tencent" href="https://apis.map.qq.com/uri/v1/marker?marker=coord:' + lat + ',' + lng + ';title:' + encodeURIComponent(name) + ';addr:&referer=myapp" target="_blank">📍 腾讯地图</a>';
+      document.getElementById('navOverlay').classList.add('show');
+    }
+    function hideNavChoice(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('navOverlay').classList.remove('show');
     }
 
     // 初始化医院地图

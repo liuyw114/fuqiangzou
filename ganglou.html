@@ -321,14 +321,54 @@
       overflow: hidden; margin-top: 16px; border: 1px solid #f0e8e4;
     }
     .nav-btn {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      width: 100%; padding: 10px; margin-top: 8px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 10px;
+      height: 30px !important;
+      background: linear-gradient(135deg, #5DB87C 0%, #7ED09A 100%);
       color: #fff; font-size: 13px; font-weight: 600;
-      border: none; border-radius: 10px; cursor: pointer;
-      text-decoration: none; transition: opacity 0.2s;
+      border: none; border-radius: 10px;
+      cursor: pointer; text-decoration: none;
+      transition: opacity 0.2s;
+      user-select: none; -webkit-user-select: none;
     }
     .nav-btn:hover, .nav-btn:active { opacity: 0.9; }
+
+    /* ===== Nav Choice Panel ===== */
+    .nav-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45); z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .nav-overlay.show { opacity: 1; pointer-events: auto; }
+    .nav-panel {
+      background: #fff; border-radius: 16px; width: 82%; max-width: 320px;
+      padding: 24px 20px 20px; text-align: center;
+      transform: scale(0.85); transition: transform 0.25s ease;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+    .nav-overlay.show .nav-panel { transform: scale(1); }
+    .nav-panel-title {
+      font-size: 16px; font-weight: 600; color: var(--text-main);
+      margin-bottom: 16px;
+    }
+    .nav-panel-list {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .nav-panel-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;
+      border: none; cursor: pointer; text-decoration: none; transition: opacity 0.2s;
+      color: #fff;
+    }
+    .nav-panel-btn:hover, .nav-panel-btn:active { opacity: 0.88; }
+    .nav-panel-btn.gaode   { background: linear-gradient(135deg, #3E8EF7 0%, #5BA3F8 100%); }
+    .nav-panel-btn.baidu  { background: linear-gradient(135deg, #3388FF 0%, #55A0FF 100%); }
+    .nav-panel-btn.tencent { background: linear-gradient(135deg, #07C160 0%, #2DD470 100%); }
+    .nav-panel-cancel {
+      margin-top: 14px; padding: 10px; border: none; background: none;
+      font-size: 13px; color: var(--text-light); cursor: pointer;
+    }
 
     /* ===== Reminder ===== */
     .reminder-card {
@@ -549,8 +589,7 @@
 
       <!-- 地图 -->
       <div class="map-container" id="tongrentangMap"></div>
-      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.426917,39.898527&name=北京同仁堂中医医院&coordinate=gaode&callnative=1"
-         target="_blank">🧭 一键导航</a>
+      <div class="nav-btn" onclick="showNavChoice(39.898527,116.426917,'北京同仁堂中医医院')">🧭 一键导航</div>
     </div>  </section>
 
   <!-- 饮食建议 -->
@@ -718,8 +757,7 @@
 
       <!-- 地图 -->
       <div class="map-container" id="gchangMap"></div>
-      <a class="nav-btn" href="https://uri.amap.com/marker?position=116.371,39.946&name=北京市肛肠医院&coordinate=gaode&callnative=1"
-         target="_blank">🧭 一键导航</a>
+      <div class="nav-btn" onclick="showNavChoice(39.946,116.371,'北京市肛肠医院')">🧭 一键导航</div>
     </div>
   </section>
 
@@ -746,6 +784,15 @@
   </nav>
 
   <div class="toast" id="toast"></div>
+
+  <!-- 导航选择面板 -->
+  <div class="nav-overlay" id="navOverlay" onclick="hideNavChoice(event)">
+    <div class="nav-panel" onclick="event.stopPropagation()">
+      <div class="nav-panel-title">选择导航方式</div>
+      <div class="nav-panel-list" id="navPanelList"></div>
+      <button class="nav-panel-cancel" onclick="hideNavChoice()">取消</button>
+    </div>
+  </div>
 
   <footer class="footer">
     <span class="heart">♥</span>
@@ -787,6 +834,20 @@
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    // 导航选择面板
+    function showNavChoice(lat, lng, name) {
+      var list = document.getElementById('navPanelList');
+      list.innerHTML =
+        '<a class="nav-panel-btn gaode"   href="https://uri.amap.com/marker?position=' + lng + ',' + lat + '&name=' + encodeURIComponent(name) + '&coordinate=gaode&callnative=1" target="_blank">🗺️ 高德地图</a>' +
+        '<a class="nav-panel-btn baidu"   href="http://api.map.baidu.com/marker?location=' + lat + ',' + lng + '&title=' + encodeURIComponent(name) + '&content=&output=html" target="_blank">🧭 百度地图</a>' +
+        '<a class="nav-panel-btn tencent" href="https://apis.map.qq.com/uri/v1/marker?marker=coord:' + lat + ',' + lng + ';title:' + encodeURIComponent(name) + ';addr:&referer=myapp" target="_blank">📍 腾讯地图</a>';
+      document.getElementById('navOverlay').classList.add('show');
+    }
+    function hideNavChoice(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('navOverlay').classList.remove('show');
     }
 
     // 初始化同仁堂地图
