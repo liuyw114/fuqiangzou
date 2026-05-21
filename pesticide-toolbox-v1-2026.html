@@ -1,0 +1,2381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>农药登记工具箱 v1.0</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f0f2f5; color: #1a1a1a;
+  display: flex; height: 100vh; overflow: hidden;
+}
+
+/* ===== Variables ===== */
+:root {
+  --primary: #2e7d32; --primary-light: #4caf50; --primary-lighter: #e8f5e9; --primary-dark: #1b5e20;
+  --bg: #f0f2f5; --card: #ffffff; --border: #e0e0e0;
+  --text: #1a1a1a; --text-secondary: #666; --text-muted: #999;
+  --danger: #d32f2f; --danger-bg: #ffebee;
+  --warning: #f57c00; --warning-bg: #fff3e0;
+  --success: #2e7d32; --success-bg: #e8f5e9;
+  --info: #1565c0; --info-bg: #e3f2fd;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --sidebar-width: 240px; --header-height: 52px; --transition: .2s ease;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: var(--sidebar-width); min-width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--primary-dark) 0%, #234a25 100%);
+  color: #fff; display: flex; flex-direction: column; overflow: hidden; z-index: 10;
+}
+.sidebar-header {
+  padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.12);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.sidebar-header .logo {
+  width: 28px; height: 28px; background: var(--primary-light); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.sidebar-header h1 { font-size: 15px; font-weight: 600; letter-spacing: .3px; }
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
+.nav-module { margin-bottom: 2px; }
+.nav-module-title {
+  display: flex; align-items: center; gap: 8px; padding: 10px 18px;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+  color: rgba(255,255,255,.5); cursor: pointer; user-select: none; transition: color var(--transition);
+}
+.nav-module-title:hover { color: rgba(255,255,255,.75); }
+.nav-module-title .icon { font-size: 13px; width: 18px; text-align: center; }
+.nav-module-title .arrow { margin-left: auto; font-size: 10px; transition: transform var(--transition); }
+.nav-module.open .nav-module-title .arrow { transform: rotate(90deg); }
+.nav-tools { max-height: 0; overflow: hidden; transition: max-height .25s ease; }
+.nav-module.open .nav-tools { max-height: 500px; }
+.nav-tool {
+  display: flex; align-items: center; padding: 7px 18px 7px 44px; font-size: 13px;
+  color: rgba(255,255,255,.7); cursor: pointer; transition: all var(--transition);
+  position: relative; border: none; background: none; width: 100%; text-align: left;
+}
+.nav-tool::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--primary-light); border-radius: 0 3px 3px 0;
+  opacity: 0; transition: opacity var(--transition);
+}
+.nav-tool:hover { background: rgba(255,255,255,.08); color: #fff; }
+.nav-tool.active { background: rgba(255,255,255,.12); color: #fff; font-weight: 500; }
+.nav-tool.active::before { opacity: 1; }
+
+/* ===== Main Area ===== */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header {
+  height: var(--header-height); background: var(--card);
+  border-bottom: 1px solid var(--border); display: flex;
+  align-items: center; padding: 0 24px; flex-shrink: 0; gap: 12px;
+}
+.header-breadcrumb { font-size: 13px; color: var(--text-secondary); }
+.header-breadcrumb span { color: var(--text); font-weight: 500; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.btn-follow {
+  background: none; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 5px 12px; font-size: 12px; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 4px;
+}
+.btn-follow:hover { border-color: var(--primary); color: var(--primary); }
+.follow-wrap { position: relative; }
+.follow-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-md); padding: 16px; text-align: center; z-index: 100;
+}
+.follow-dropdown.open { display: block; }
+.follow-qr { width: 160px; height: 160px; border-radius: 6px; }
+.follow-tip { font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+.content::-webkit-scrollbar { width: 6px; }
+.content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+/* ===== Tool Panel ===== */
+.tool-panel { display: none; animation: fadeIn .25s ease; }
+.tool-panel.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tool-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; }
+.tool-card-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.tool-card-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+
+/* ===== Form Elements ===== */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.form-input, .form-select {
+  height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; color: var(--text); background: #fafafa; outline: none;
+  transition: all var(--transition); font-family: inherit;
+}
+.form-input:focus, .form-select:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(46,125,50,.1); }
+.form-input.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(211,47,47,.08); }
+.form-hint { font-size: 11px; color: var(--text-muted); }
+.form-input-group { display: flex; gap: 0; }
+.form-input-group .form-input { border-radius: 6px 0 0 6px; flex: 1; }
+.form-input-group .form-select { border-radius: 0 6px 6px 0; border-left: none; min-width: 80px; }
+
+/* Buttons */
+.btn-calculate {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 24px;
+  background: var(--primary); color: #fff; border: none; border-radius: 6px;
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--transition); font-family: inherit;
+}
+.btn-calculate:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-calculate:active { transform: translateY(0); }
+.btn-reset {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px;
+  background: #fff; color: var(--text-secondary); border: 1px solid var(--border);
+  border-radius: 6px; font-size: 13px; cursor: pointer; transition: all var(--transition); font-family: inherit;
+}
+.btn-reset:hover { border-color: var(--danger); color: var(--danger); }
+.btn-row { display: flex; gap: 10px; margin-bottom: 20px; }
+
+/* ===== Result Area ===== */
+.result-area { display: none; border-top: 1px solid var(--border); padding-top: 20px; }
+.result-area.visible { display: block; }
+.result-title { font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.result-item { background: var(--primary-lighter); border-radius: 6px; padding: 12px; }
+.result-item.danger { background: var(--danger-bg); }
+.result-item.warning { background: var(--warning-bg); }
+.result-item.success { background: var(--success-bg); }
+.result-item.info { background: var(--info-bg); }
+.result-item-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.result-item-value { font-size: 18px; font-weight: 700; color: var(--text); }
+.result-item-value.danger { color: var(--danger); }
+.result-item-value.warning { color: var(--warning); }
+.result-item-value.success { color: var(--success); }
+
+/* Toxicity Badge */
+.tox-badge { display: inline-flex; align-items: center; padding: 4px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+.tox-badge.level-1 { background: #d32f2f; color: #fff; }
+.tox-badge.level-2 { background: #f57c00; color: #fff; }
+.tox-badge.level-3 { background: #fbc02d; color: #1a1a1a; }
+.tox-badge.level-4 { background: #4caf50; color: #fff; }
+.tox-badge.level-5 { background: #9e9e9e; color: #fff; }
+.tox-badge.success { background: #4caf50; color: #fff; }
+.tox-badge.warning { background: #f57c00; color: #fff; }
+.tox-badge.danger { background: #d32f2f; color: #fff; }
+
+/* ===== Reference Table ===== */
+.ref-table-wrap { overflow-x: auto; margin-top: 4px; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ref-table th {
+  background: var(--primary-lighter); color: var(--primary-dark); padding: 8px 12px;
+  text-align: left; font-weight: 600; border-bottom: 2px solid var(--primary-light); white-space: nowrap;
+}
+.ref-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+.ref-table tr:hover td { background: #fafafa; }
+.ref-table .level-cell { text-align: center; font-weight: 600; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; transition: left var(--transition); z-index: 50; }
+  .sidebar.mobile-open { left: 0; }
+  .mobile-toggle { display: flex !important; background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px; color: var(--text); }
+  .content { padding: 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+@media (min-width: 769px) { .mobile-toggle { display: none !important; } }
+
+/* ===== Welcome / Home ===== */
+.welcome {
+  display: flex; flex-direction: column; align-items: stretch;
+  height: 100%; overflow-y: auto; padding: 32px 40px 40px; gap: 0;
+}
+.welcome::-webkit-scrollbar { width: 5px; }
+.welcome::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+.home-hero {
+  text-align: center; padding: 36px 20px 28px;
+  background: linear-gradient(135deg, var(--primary) 0%, #43a047 100%);
+  border-radius: 12px; color: #fff; margin-bottom: 28px;
+}
+.home-hero .hero-icon { font-size: 40px; margin-bottom: 10px; }
+.home-hero h2 { font-size: 22px; font-weight: 600; margin-bottom: 10px; letter-spacing: .5px; }
+.home-hero p { font-size: 14px; line-height: 1.9; max-width: 680px; margin: 0 auto; opacity: .92; }
+.home-section { margin-bottom: 24px; }
+.home-section h3 {
+  font-size: 16px; font-weight: 600; color: var(--primary-dark);
+  margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--primary); line-height: 1.4;
+}
+.home-section .section-body { font-size: 13.5px; line-height: 1.9; color: var(--text); }
+.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.home-grid-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; display: flex; align-items: flex-start; gap: 10px;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.home-grid-item:hover { box-shadow: var(--shadow-md); border-color: var(--primary-light); }
+.home-tool-link { color: var(--text-secondary); text-decoration: none; transition: color .15s; }
+.home-tool-link:hover { color: var(--primary); text-decoration: underline; }
+.home-grid-item .item-icon {
+  flex-shrink: 0; width: 32px; height: 32px; background: var(--primary-lighter);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--primary);
+}
+.home-grid-item .item-text { flex: 1; }
+.home-grid-item .item-text strong { display: block; font-size: 13px; margin-bottom: 2px; color: var(--text); }
+.home-grid-item .item-text span { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.home-contact {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 20px 36px;
+}
+.contact-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
+.contact-item .ci-icon {
+  width: 28px; height: 28px; background: var(--primary-lighter); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--primary); flex-shrink: 0;
+}
+.contact-item a { color: var(--primary); text-decoration: none; }
+.contact-item a:hover { text-decoration: underline; }
+
+/* ===== Disclaimer Footer ===== */
+.disclaimer-footer {
+  flex-shrink: 0; padding: 8px 24px; background: var(--card);
+  border-top: 1px solid var(--border); text-align: center;
+  font-size: 11px; color: var(--text-muted); line-height: 1.6;
+}
+
+/* ===== Registry Query ===== */
+.reg-tabs { display: flex; gap: 6px; margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 0; }
+.reg-tab {
+  padding: 8px 20px; font-size: 13px; font-weight: 500; border: none; background: none;
+  color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all var(--transition); border-radius: 4px 4px 0 0;
+}
+.reg-tab:hover { color: var(--primary); background: var(--primary-lighter); }
+.reg-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-lighter); font-weight: 600; }
+.reg-search { margin-bottom: 16px; }
+.reg-search .form-input { width: 100%; max-width: 400px; }
+.reg-region { display: none; }
+.reg-region.active { display: block; }
+.reg-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.reg-table th { background: var(--primary-lighter); color: var(--primary-dark); padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; white-space: nowrap; }
+.reg-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.reg-table tr:hover td { background: #f8faf8; }
+.reg-table tr.hidden-row { display: none; }
+.reg-country { font-weight: 500; white-space: nowrap; color: var(--text); }
+.reg-link { color: var(--info); text-decoration: none; word-break: break-all; font-size: 12px; transition: color var(--transition); }
+.reg-link:hover { color: var(--primary); text-decoration: underline; }
+
+/* ===== Assessment Report Query ===== */
+.assess-search { margin-bottom: 12px; }
+.assess-search .form-input { width: 100%; max-width: 400px; }
+.assess-tips { padding: 10px 14px; background: var(--info-bg); border-radius: 6px; font-size: 12px; color: var(--info); margin-bottom: 20px; line-height: 1.6; }
+.assess-country { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; transition: box-shadow var(--transition); }
+.assess-country:hover { box-shadow: var(--shadow-md); }
+.assess-country.hidden-card { display: none; }
+.assess-country-header {
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+  background: var(--primary-lighter); border-bottom: 1px solid var(--border);
+}
+.assess-flag { font-size: 24px; }
+.assess-country-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.assess-agency { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.assess-intro { padding: 12px 18px; font-size: 12px; color: var(--text-secondary); line-height: 1.7; border-bottom: 1px solid var(--border); background: #fafafa; }
+.assess-platforms { padding: 12px 18px; }
+.assess-platform { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.assess-platform:last-child { border-bottom: none; }
+.assess-platform-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.assess-platform-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.assess-tool-box { margin-top: 20px; padding: 16px 18px; background: #fafafa; border-radius: var(--radius); border: 1px dashed var(--border); }
+.assess-tool-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.assess-section-title {
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--text-muted); margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+
+/* ===== Common Name Query ===== */
+.cname-platforms { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.cname-card {
+  display: block; padding: 20px; border: 1px solid var(--border); border-radius: var(--radius);
+  text-decoration: none; color: var(--text); transition: all var(--transition);
+}
+.cname-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.cname-card-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.cname-card-url { font-size: 12px; color: var(--info); margin-bottom: 8px; }
+.cname-card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+</style>
+</head>
+
+<body>
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header" onclick="goHome()" style="cursor:pointer;">
+    <div class="logo">&#9878;</div>
+    <h1>农药登记工具箱 v1.0</h1>
+  </div>
+  <nav class="sidebar-nav" id="sidebarNav"></nav>
+</aside>
+
+<!-- ===== Main ===== -->
+<div class="main">
+  <header class="header">
+    <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('mobile-open')">&#9776;</button>
+    <div class="header-breadcrumb" id="breadcrumb">工具箱 / <span>请选择工具</span></div>
+    <div class="header-right">
+      <div class="follow-wrap">
+        <button class="btn-follow" onclick="toggleFollow()">&#9733; 关注我们</button>
+        <div class="follow-dropdown" id="followDropdown">
+          <img src="https://www.cirs-group.com/files/bjay66jl2jgg/content/2022/08/btetx9znfym8.jpg" alt="二维码" class="follow-qr" />
+          <p class="follow-tip">扫码关注「瑞旭农化法规服务站」</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="content" id="content">
+    <div class="welcome" id="welcome">
+      <!-- Hero -->
+      <div class="home-hero">
+        <div class="hero-icon">&#9878;</div>
+        <h2>农药登记工具箱 v1.0</h2>
+        <p>面向农药登记从业者的一站式在线工具集，涵盖全球农药登记查询、评估报告检索、农药通用名查询、单位换算(如用药量、稀释倍数)、毒性分级、风险评估等核心功能。所有计算均在本地浏览器完成，数据不上传。</p>
+        <p style="margin-top:12px;font-size:12px;opacity:.8;">Copyright &copy; 瑞旭集团农化事业部 &nbsp;|&nbsp; 意见反馈：<a href="mailto:agrochem@cirs-group.com" style="color:#fff;text-decoration:underline;">agrochem@cirs-group.com</a></p>
+      </div>
+      <!-- 工具箱功能概览 -->
+      <div class="home-section">
+        <h3>工具功能一览</h3>
+        <div class="home-grid" id="homeFeatureGrid"></div>
+      </div>
+      <!-- 瑞旭集团介绍 -->
+      <div class="home-section">
+        <h3>关于瑞旭集团（CIRS）</h3>
+        <div class="section-body">
+          <p>瑞旭集团（CIRS Group）是一家全球专业的产品安全管理服务机构，成立于 2007 年，总部位于杭州，在爱尔兰、美国、英国、韩国、日本、上海、北京、南京等地拥有分支机构。瑞旭集团专业为化工、化妆品、食品、医疗器械、消毒品、农化和消费品企业，科研机构及行业协会提供从<strong>合规咨询、实验室检测、研发支持到数据服务</strong>的一站式合规解决方案，帮助企业实现产品合规，快速获得市场准入，提升全球竞争力。</p>
+        </div>
+      </div>
+      <!-- 农化事业部服务 -->
+      <div class="home-section">
+        <h3>农化事业部 — 服务领域</h3>
+        <div class="section-body">
+          <p style="margin-bottom:14px;">瑞旭集团农化事业部致力于为国内外企业提供全球农药与肥料产品登记服务与专业的法规技术咨询。团队成员学历均在硕士及以上，核心成员来自全球一流农化企业的资深法规专家，在农用化学品登记策略、注册（备案）流程、资料要求和风险评估等方面有着丰富的技术经验。</p>
+        </div>
+        <div class="home-grid">
+          <div class="home-grid-item"><div class="item-icon">&#127793;</div><div class="item-text"><strong>中国农药登记</strong><span>新农药、非农药用途备案、卫生杀虫剂、生物化学农药、植物源农药、微生物农药登记及农药风险评估</span></div></div>
+          <div class="home-grid-item"><div class="item-icon">&#127758;</div><div class="item-text"><strong>境外农药登记</strong><span>欧盟、美国 EPA、澳大利亚 APVMA、加拿大及东南亚（越南、印尼、泰国、缅甸、马来西亚、柬埔寨、菲律宾）农药登记</span></div></div>
+          <div class="home-grid-item"><div class="item-icon">&#128300;</div><div class="item-text"><strong>生物杀灭剂</strong><span>欧盟 BPR、英国 GB BPR、美国 EPA 消毒剂登记、土耳其 TR BPR、韩国 K-BPR 法规咨询</span></div></div>
+          <div class="home-grid-item"><div class="item-icon">&#127807;</div><div class="item-text"><strong>肥料与生物刺激素</strong><span>中国肥料登记备案、欧盟肥料与生物刺激素 CE 认证咨询、美国肥料登记</span></div></div>
+          <div class="home-grid-item"><div class="item-icon">&#128202;</div><div class="item-text"><strong>农药登记 QSAR 服务</strong><span>多种定量构效关系（QSAR）模型预测与报告，评估有效成分/代谢物/杂质毒性终点，支持登记</span></div></div>
+        </div>
+      </div>
+      <!-- 联系方式 -->
+      <div class="home-section">
+        <h3>联系我们</h3>
+        <div class="home-contact">
+          <div class="contact-item"><div class="ci-icon">&#127970;</div><span><strong>杭州瑞旭科技集团有限公司</strong></span></div>
+          <div class="contact-item"><div class="ci-icon">&#128205;</div><span>总部：杭州市滨江区秋溢路 288 号东冠高新科技园 1 号楼 11 楼</span></div>
+          <div class="contact-item"><div class="ci-icon">&#128279;</div><span>官网：<a href="https://www.cirs-group.com/cn/agrochemicals" target="_blank">www.cirs-group.com/cn/agrochemicals</a></span></div>
+          <div class="contact-item"><div class="ci-icon">&#128222;</div><span>北京：010 63984032</span></div>
+          <div class="contact-item"><div class="ci-icon">&#128222;</div><span>上海：021 5077 8970</span></div>
+          <div class="contact-item"><div class="ci-icon">&#128222;</div><span>杭州：0571 88233256</span></div>
+          <div class="contact-item"><div class="ci-icon">&#128231;</div><span>邮箱：<a href="mailto:agrochem@cirs-group.com">agrochem@cirs-group.com</a></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer-footer">本工具仅供学习参考，计算结果不作为法规合规依据，使用者应自行核实并承担相应责任。</div>
+</div>
+
+<!-- ===== JS Scripts (inlined for standalone) ===== -->
+
+<script>
+// data.js — 全局数据：模块定义、单位暴露量、作物靶标数据、膳食消费量
+
+// 膳食消费量参考数据（来源：《2002年中国居民营养与健康现状》，2004年10月12日公布）
+// 消费量单位：kg/天，合计 1.0286 kg
+const DIETARY_FOOD_CATEGORIES = [
+  { name: '米及其制品',     consumption: 0.2399 },
+  { name: '面及其制品',     consumption: 0.1385 },
+  { name: '其它谷类',       consumption: 0.0233 },
+  { name: '薯类',           consumption: 0.0495 },
+  { name: '干豆类及其制品', consumption: 0.0160 },
+  { name: '深色蔬菜',       consumption: 0.0915 },
+  { name: '浅色蔬菜',       consumption: 0.1837 },
+  { name: '腌菜',           consumption: 0.0103 },
+  { name: '水果',           consumption: 0.0457 },
+  { name: '坚果',           consumption: 0.0039 },
+  { name: '畜禽类',         consumption: 0.0795 },
+  { name: '奶及其制品',     consumption: 0.0263 },
+  { name: '蛋及其制品',     consumption: 0.0236 },
+  { name: '鱼虾类',         consumption: 0.0301 },
+  { name: '植物油',         consumption: 0.0327 },
+  { name: '动物油',         consumption: 0.0087 },
+  { name: '糖、淀粉',       consumption: 0.0044 },
+  { name: '食盐',           consumption: 0.0120 },
+  { name: '酱油',           consumption: 0.0090 },
+  { name: '茶叶',           consumption: 0.0120 },
+  { name: '食用菌',         consumption: 0.0420 },
+  { name: '药食两用植物',   consumption: 0.0090 },
+];
+
+// 膳食风险评估 — 作物→食物归类对照表
+const CROP_FOOD_MAPPING = [
+  { crop: '赤豆',         category: '干豆类及其制品' },
+  { crop: '绿豆',         category: '干豆类及其制品' },
+  { crop: '豌豆',         category: '干豆类及其制品' },
+  { crop: '小扁豆',       category: '干豆类及其制品' },
+  { crop: '大豆',         category: '干豆类及其制品' },
+  { crop: '豆类（干）',   category: '干豆类及其制品' },
+  { crop: '大葱',         category: '酱油' },
+  { crop: '大蒜',         category: '酱油' },
+  { crop: '菱',           category: '酱油' },
+  { crop: '糙米',         category: '米及其制品' },
+  { crop: '大米',         category: '米及其制品' },
+  { crop: '稻谷',         category: '米及其制品' },
+  { crop: '稻米',         category: '米及其制品' },
+  { crop: '水稻',         category: '米及其制品' },
+  { crop: '其他麦类',     category: '面及其制品' },
+  { crop: '小麦',         category: '面及其制品' },
+  { crop: '高梁',         category: '其它谷类' },
+  { crop: '谷子',         category: '其它谷类' },
+  { crop: '禾谷类',       category: '其它谷类' },
+  { crop: '玉米',         category: '其它谷类' },
+  { crop: '菜豆',         category: '浅色蔬菜' },
+  { crop: '菜用大豆',     category: '浅色蔬菜' },
+  { crop: '大白菜',       category: '浅色蔬菜' },
+  { crop: '冬瓜',         category: '浅色蔬菜' },
+  { crop: '甘蓝',         category: '浅色蔬菜' },
+  { crop: '根甜菜',       category: '浅色蔬菜' },
+  { crop: '瓜菜类蔬菜',   category: '浅色蔬菜' },
+  { crop: '瓜类',         category: '浅色蔬菜' },
+  { crop: '花椰菜',       category: '浅色蔬菜' },
+  { crop: '黄瓜',         category: '浅色蔬菜' },
+  { crop: '豇豆',         category: '浅色蔬菜' },
+  { crop: '节瓜',         category: '浅色蔬菜' },
+  { crop: '苦瓜',         category: '浅色蔬菜' },
+  { crop: '莲藕',         category: '浅色蔬菜' },
+  { crop: '芦笋',         category: '浅色蔬菜' },
+  { crop: '萝卜',         category: '浅色蔬菜' },
+  { crop: '南瓜',         category: '浅色蔬菜' },
+  { crop: '其它豆类蔬菜（含荚）', category: '浅色蔬菜' },
+  { crop: '茄子',         category: '浅色蔬菜' },
+  { crop: '茭白',         category: '浅色蔬菜' },
+  { crop: '青豆',         category: '浅色蔬菜' },
+  { crop: '秋葵',         category: '浅色蔬菜' },
+  { crop: '丝瓜',         category: '浅色蔬菜' },
+  { crop: '蒜苔',         category: '浅色蔬菜' },
+  { crop: '甜玉米',       category: '浅色蔬菜' },
+  { crop: '豌豆',         category: '浅色蔬菜' },
+  { crop: '莴苣',         category: '浅色蔬菜' },
+  { crop: '莴笋',         category: '浅色蔬菜' },
+  { crop: '西葫芦',       category: '浅色蔬菜' },
+  { crop: '洋葱',         category: '浅色蔬菜' },
+  { crop: '块根芹',       category: '浅色蔬菜' },
+  { crop: '果菜类蔬菜',   category: '浅色蔬菜/深色蔬菜' },
+  { crop: '叶菜',         category: '浅色蔬菜/深色蔬菜' },
+  { crop: '甘蓝类蔬菜',   category: '浅色蔬菜/深色蔬菜' },
+  { crop: '茎类蔬菜',     category: '浅色蔬菜/深色蔬菜' },
+  { crop: '其它茄果类蔬菜', category: '浅色蔬菜/深色蔬菜' },
+  { crop: '蔬菜',         category: '浅色蔬菜/深色蔬菜' },
+  { crop: '菠菜',         category: '深色蔬菜' },
+  { crop: '番茄',         category: '深色蔬菜' },
+  { crop: '胡萝卜',       category: '深色蔬菜' },
+  { crop: '茴香',         category: '深色蔬菜' },
+];
+
+const MODULES = [
+  {
+    id: 'registry', name: '农药查询', icon: '&#128269;',
+    tools: [
+      { id: 'global', name: '全球登记查询' },
+      { id: 'assessment', name: '农药数据查询' },
+      { id: 'commonname', name: '农药通用名查询' },
+    ]
+  },
+  {
+    id: 'converter', name: '单位换算', icon: '&#8644;',
+    tools: [
+      { id: 'conc', name: '浓度换算' },
+      { id: 'dosage', name: '用量换算' },
+      { id: 'dilution', name: '稀释换算' },
+      { id: 'area', name: '面积换算' },
+      { id: 'mass', name: '质量换算' },
+      { id: 'volume', name: '体积换算' },
+    ]
+  },
+  {
+    id: 'toxicity', name: '毒性分级', icon: '&#9888;',
+    tools: [
+      { id: 'acute', name: '急性毒性分级' },
+      { id: 'compare', name: '急性毒性对照表' },
+      { id: 'eco', name: '生态毒性分级' },
+      { id: 'ecoCompare', name: '生态毒性对照表' },
+    ]
+  },
+  {
+    id: 'risk', name: '风险评估', icon: '&#128202;',
+    tools: [
+      { id: 'rq', name: '施药者健康风险评估' },
+      { id: 'ue', name: '单位暴露量查询' },
+      { id: 'dietary', name: '膳食风险评估' },
+      { id: 'cropClassify', name: '膳食风险评估作物分类' },
+      { id: 'adi', name: 'ADI 推算' },
+    ]
+  },
+];
+
+// 单位暴露量数据
+const UE_DATA = {
+  formulationToCategory: {
+    '可分散油悬浮剂(OD)': 1, '乳油(EC)': 1,
+    '可分散液剂(DC)': 2, '可溶液剂(SL)': 2, '水剂(AS)': 2, '水乳剂(EW)': 2,
+    '微囊悬浮剂(CS)': 2, '微乳剂(ME)': 2, '悬浮剂(SC)': 2, '悬乳剂(SE)': 2,
+    '可溶粉剂(SP)': 3, '可湿性粉剂(WP)': 3,
+    '可溶粒剂(SG)': 4, '可溶片剂(ST)': 4, '泡腾粒剂(EB)': 4, '泡腾片剂(ET)': 4,
+    '水分散粒剂(WG)': 4,
+  },
+  mixDermal: {
+    1: [763.984, 763.984, 132.671],
+    2: [178.402, 178.402, 5.367],
+    3: [105.874, 105.874, 5.089],
+    4: [46.174, 46.174, 3.816],
+  },
+  mixInhal: {
+    1: [0.725, 0.725, 0.653],
+    2: [0.572, 0.572, 0.514],
+    3: [0.578, 0.578, 0.520],
+    4: [0.661, 0.661, 0.595],
+  },
+  applyDermal: {
+    '低': [493.155, 117.517, 65.118],
+    '中': [1361.303, 727.341, 396.197],
+    '高': [1469.724, 851.172, 234.560],
+  },
+  applyInhal: {
+    '低': [1.125, 1.125, 1.012],
+    '中': [5.155, 5.155, 4.639],
+    '高': [2.184, 2.184, 1.965],
+  },
+  cropTarget: {
+    '三七': {'根腐病':'低','黑斑病':'低'},
+    '丝瓜': {'霜霉病':'低、中、高'},
+    '亚麻': {'一年生禾本科杂草':'低','调节生长':'低、中'},
+    '人参': {'灰霉病':'低','疫病':'低','黑斑病':'低'},
+    '农田': {'蝗虫':'低'},
+    '冬小麦田': {'一年生单子叶杂草':'低','一年生双子叶杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','双子叶杂草':'低','增产':'低、中','多年生阔叶杂草':'低','杂草':'低','牛繁缕':'低','猪殃殃为主的阔叶杂草':'低','看麦娘':'低','禾本科杂草':'低','莎草科杂草':'低','蚜虫':'低、中','调节生长':'低、中','阔叶杂草':'低'},
+    '冬油菜田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','小粒种子阔叶杂草':'低','杂草':'低','禾本科杂草':'低','阔叶杂草':'低'},
+    '冬瓜': {'炭疽病':'低','霜霉病':'低'},
+    '剑麻园': {'杂草':'低','蝗虫':'低','行间杂草':'低'},
+    '十字花科蔬菜': {'小菜蛾':'低','斜纹夜蛾':'低','棉蚜':'低','棉铃虫':'低','甜菜夜蛾':'低','白粉虱':'低','美洲斑潜蝇':'低','菜蚜':'低','菜青虫':'低','蚜虫':'低','调节生长':'低','霜霉病':'低','黄条跳甲':'低'},
+    '原粮': {'仓储害虫':'低','玉米象':'低','谷蠹':'低','赤拟谷盗':'低'},
+    '叶菜': {'增产':'低','害虫':'低','小菜蛾':'低','提高产量':'低','甜菜夜蛾':'低','白粉病':'低','红蜘蛛':'低','菜红蜘蛛':'低','菜青虫':'低','蚜虫':'低','调节生长':'低'},
+    '向日葵田': {'一年生和多年生杂草':'低','行间杂草':'低'},
+    '啤酒花': {'叶螨':'低、中、高'},
+    '夏大豆田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','禾本科杂草':'低','莎草科杂草':'低','阔叶杂草':'低'},
+    '夏玉米': {'一年生杂草':'低','杂草':'低','行间杂草':'低'},
+    '夏玉米田': {'一年生单子叶杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','双子叶杂草':'低','多年生杂草':'低','小粒种子阔叶杂草':'低','杂草':'低','阔叶杂草':'低','香附子':'低'},
+    '多年生杂草': {'蘑菇':'低'},
+    '大葱': {'一年生杂草':'低','甜菜夜蛾':'低','美洲斑潜蝇':'低','蓟马':'低'},
+    '大蒜': {'叶枯病':'低','增产':'低','调节生长':'低'},
+    '大蒜田': {'一年生杂草':'低','一年生禾本科杂草':'低','阔叶杂草':'低'},
+    '大豆': {'促进生长':'低、中','叶斑病':'低、中','增产':'低、中','植物健康作用':'低、中','甜菜夜蛾':'低、中','美洲斑潜蝇':'低、中','蚜虫':'低、中','调节生长':'低、中','豆荚螟':'低、中','造桥虫':'低、中','锈病':'低、中','食心虫':'低、中'},
+    '大豆田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','双子叶杂草':'低','多年生禾本科杂草':'低','小粒种子阔叶杂草':'低','杂草':'低','禾本科杂草':'低','莎草科杂草':'低','菟丝子':'低、中','豆荚螟':'低','阔叶杂草':'低'},
+    '大麦田': {'一年生杂草':'低','一年生禾本科杂草':'低','野燕麦':'低','防止倒伏':'低、中'},
+    '姜田': {'一年生杂草':'低','叶斑病':'低','增产':'低','姜瘟病':'低、中','腐烂病':'低','调节生长':'低'},
+    '小油菜': {'小菜蛾':'低','斑潜蝇':'低','甜菜夜蛾':'低','菜青虫':'低'},
+    '小白菜': {'增产':'低','小菜蛾':'低','斜纹夜蛾':'低','甜菜夜蛾':'低','菜蚜':'低','菜青虫':'低','蚜虫':'低','蜗牛':'低','调节生长':'低','黄条跳甲':'低'},
+    '小麦': {'促进生长':'低、中','叶斑病':'低、中','叶锈病':'低、中','吸浆虫':'中','增产':'低、中','害虫':'低、中','小麦赤霉病':'中','提高产量':'低、中','条锈病':'低、中','根腐病':'低','灰飞虱':'低、中','白粉病':'低、中','红蜘蛛':'低、中','纹枯病':'低、中','蚜虫':'低、中','螨':'低、中','调节生长':'低、中','赤霉病':'低、中','锈病':'低、中','防止倒伏':'低、中','霜霉病':'低、中','麦蚜':'低、中','黏虫':'低、中'},
+    '小麦田': {'一年生单子叶杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','双子叶杂草':'低','杂草':'低','看麦娘':'低、中','禾本科杂草':'低','野燕麦':'低、中','阔叶杂草':'低'},
+    '平菇': {'调节生长':'低'},
+    '春大豆田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','多年生禾本科杂草':'低','多年生阔叶杂草':'低','小粒种子阔叶杂草':'低','禾本科杂草':'低','稗草':'低','芦苇':'低','莎草':'低','莎草科杂草':'低','阔叶杂草':'低'},
+    '春小麦田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','杂草':'低','牛繁缕':'低','禾本科杂草':'低','蚜虫':'低、中','野燕麦':'低','阔叶杂草':'低'},
+    '春油菜田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','禾本科杂草':'低','阔叶杂草':'低'},
+    '春玉米田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','双子叶杂草':'低','小粒种子阔叶杂草':'低','杂草':'低','行间杂草':'低','阔叶杂草':'低'},
+    '木瓜': {'杂草':'低','湿泡病':'低','白腐病':'低','褐腐病':'低'},
+    '杭白菊': {'蚜虫':'低'},
+    '林业苗圃': {'一年生杂草':'低','一年生禾本科杂草':'低'},
+    '果园': {'杂草':'低','行间杂草':'低'},
+    '柑橘园': {'一年生和多年生杂草':'低','一年生杂草':'低','一年生阔叶杂草':'低','多年生杂草':'低','杂草':'低','行间杂草':'低','阔叶杂草':'低'},
+    '柑橘树': {'保鲜':'低'},
+    '桑园': {'杂草':'低','行间杂草':'低'},
+    '梨园': {'一年生杂草':'低','杂草':'低','行间杂草':'低'},
+    '棉花': {'主要害虫':'中','二代棉铃虫':'中','伏蚜':'中','催熟':'中','叶螨':'低、中','叶跳虫':'低、中','地老虎':'低','增产':'低、中','害虫':'低、中','提高产量':'中','提高结铃率':'中','斜纹夜蛾':'低、中','枯萎病':'低、中','棉红蜘蛛':'低、中','棉蚜':'低、中','棉铃虫':'低、中','炭疽病':'低、中','烟粉虱':'低、中','甜菜夜蛾':'低、中','白粉虱':'低、中','盲蝽蟓':'低、中','立枯病':'低','红蜘蛛':'低、中','红铃虫':'低、中','美洲斑潜蝇':'低、中','脱叶':'中','蓟马':'低、中','蚜虫':'低、中','螨':'低、中','调节生长':'低、中','造桥虫':'低、中','防止徒长,化学整枝':'中','防止疯长':'低、中','黄萎病':'低、中'},
+    '棉花田': {'一年生和多年生杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','小粒种子阔叶杂草':'低','杂草':'低','禾本科杂草':'低','芦苇':'低','行间杂草':'低','阔叶杂草':'低'},
+    '森林': {'一年生杂草':'低','杂草':'低','灌木':'低、中','阔叶杂草':'低'},
+    '橡胶园': {'一年生杂草':'低','杂草':'低'},
+    '水田畦畔': {'水花生':'低','空心莲子草':'低'},
+    '水稻': {'千金子':'低','干燥':'低','福寿螺':'低','立枯病':'低'},
+    '水稻田': {'一年生和多年生杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生莎草':'低','一年生阔叶杂草':'低','三棱草':'低','千金子':'低','多年生杂草':'低','多年生莎草':'低','多年生阔叶杂草':'低','幼龄稗草':'低','异型莎草':'低','扁杆藨草':'低','杂草':'低','水绵':'低','水花生':'低','沟繁缕':'低','牛毛草':'低','福寿螺':'低','禾本科杂草':'低','稗草':'低','稻瘟病':'低','莎草':'低','莎草科杂草':'低','调节生长':'低','阔叶杂草':'低','鸭舌草':'低'},
+    '水稻秧田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','促分蘖':'低','促进新根生长':'低','千金子':'低','双子叶杂草':'低','多年生杂草':'低','多年生阔叶杂草':'低','异型莎草':'低','控制生长':'低','牛毛草':'低','禾本科杂草':'低','稗草':'低','立枯病':'低','莎草科杂草':'低','调节生长':'低','阔叶杂草':'低'},
+    '油菜': {'增产':'低','控制生长':'低','斑潜蝇':'低','病害':'低','菌核病':'低','蚜虫':'低','调节生长':'低','黄条跳甲':'低'},
+    '油菜田': {'一年生和多年生杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','多年生禾本科杂草':'低','小粒种子阔叶杂草':'低','牛繁缕':'低','禾本科杂草':'低','繁缕':'低','阔叶杂草':'低'},
+    '洋葱田': {'紫斑病':'低'},
+    '滩涂': {'蝗虫':'低','钉螺':'低'},
+    '烟草': {'增产':'低、中、高','小地老虎':'低','斜纹夜蛾':'低、中、高','根腐病':'低','炭疽病':'低、中、高','烟蚜':'低、中、高','烟青虫':'低、中、高','病毒病':'低、中、高','白粉病':'低、中、高','立枯病':'低、中、高','花叶病':'低、中','花叶病毒病':'低、中','菜青虫':'低、中、高','蚜虫':'低、中、高','调节生长':'低、中、高','赤星病':'低、中、高','野火病':'低、中、高','青枯病':'低','食叶害虫':'低、中、高','黑胫病':'低、中'},
+    '烟草田': {'一年生杂草':'低','一年生禾本科杂草':'低','阔叶杂草':'低'},
+    '玉米': {'促进生长':'低、中、高','增产':'低、中、高','大斑病':'低、中、高','害虫':'低、中、高','小地老虎':'低','小斑病':'低、中、高','提高产量':'低、中、高','植物健康作用':'低、中、高','玉米螟':'低、中','粗缩病':'低、中、高','蚜虫':'低、中、高','调节生长':'低、中、高','黏虫':'低、中、高','黑粉病':'低'},
+    '玉米田': {'一年生单子叶杂草':'低','一年生双子叶杂草':'低','一年生和多年生杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','双子叶杂草':'低','小粒种子阔叶杂草':'低','杂草':'低','禾本科杂草':'低','阔叶杂草':'低'},
+    '甘蓝': {'增产':'低','小菜蛾':'低','斜纹夜蛾':'低','桃蚜':'低','甜菜夜蛾':'低','白粉虱':'低','菜蚜':'低','菜青虫':'低','蓟马':'低','蚜虫':'低','蜗牛':'低','调节生长':'低','黄条跳甲':'低'},
+    '甘蓝田': {'一年生杂草':'低','一年生禾本科杂草':'低','杂草':'低','阔叶杂草':'低'},
+    '甘蔗': {'小地老虎':'低'},
+    '甘蔗田': {'一年生和多年生杂草':'低','一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','杂草':'低','禾本科杂草':'低','莎草':'低','行间杂草':'低','阔叶杂草':'低'},
+    '甘薯': {'增产':'低','茎线虫病':'低','调节生长':'低','黑斑病':'低'},
+    '甜椒': {'炭疽病':'低','疫病':'低'},
+    '甜瓜': {'增产':'低','白粉病':'低','霜霉病':'低'},
+    '甜菜': {'根腐病':'低','甘蓝夜蛾':'低','褐斑病':'低'},
+    '甜菜田': {'一年生禾本科杂草':'低','一年生阔叶杂草':'低','禾本科杂草':'低','阔叶杂草':'低'},
+    '番茄': {'一年生杂草':'低、中、高','促进生长':'低、中、高','催熟':'低','叶斑病':'低、中、高','叶腐病':'低、中、高','叶霉病':'低、中、高','增产':'低、中、高','斑潜蝇':'低、中、高','早疫病':'低、中、高','晚疫病':'低、中、高','棉铃虫':'低、中、高','溃疡病':'低、中、高','灰霉病':'低、中、高','炭疽病':'低、中、高','烟粉虱':'低、中、高','猝倒病':'低','甜菜夜蛾':'低、中、高','病害':'低、中、高','病毒病':'低、中、高','白粉虱':'低、中、高','立枯病':'低','粉虱':'低、中、高','美洲斑潜蝇':'低、中、高','花叶病':'低、中、高','蓟马':'低、中、高','蕨叶病':'低、中、高','蚜虫':'低、中、高','调节生长':'低、中、高','青枯病':'低'},
+    '白术': {'白绢病':'低'},
+    '白菜': {'一年生杂草':'低','一年生禾本科杂草':'低','主要害虫':'低','促进生长':'低','地下害虫':'低','增产':'低','害虫':'低','小菜蛾':'低','根肿病':'低','炭疽病':'低','白斑病':'低','菜青虫':'低','蚜虫':'低','调节生长':'低','软腐病':'低','黄条跳甲':'低','黑斑病':'低'},
+    '糜子': {'一年生杂草':'低'},
+    '红小豆田': {'一年生杂草':'低','一年生禾本科杂草':'低'},
+    '红松苗圃': {'一年生杂草':'低'},
+    '绿肥': {'一年生杂草':'低','增产':'低'},
+    '绿豆田': {'一年生禾本科杂草':'低'},
+    '节瓜': {'蓟马':'低、中'},
+    '芝麻田': {'一年生禾本科杂草':'低'},
+    '芥蓝': {'小菜蛾':'低'},
+    '芦苇': {'阔叶杂草':'低'},
+    '花椰菜': {'一年生禾本科杂草':'低','斜纹夜蛾':'低','霜霉病':'低'},
+    '花生': {'倒秧病':'低','叶斑病':'低','增产':'低','提高产量':'低','斜纹夜蛾':'低','棉铃虫':'低','白绢病':'低','网斑病':'低','蚜虫':'低','蛴螬':'低','褐斑病':'低','调节生长':'低','金针虫':'低','锈病':'低'},
+    '花生田': {'一年生杂草':'低','一年生禾本科杂草':'低','一年生阔叶杂草':'低','双子叶杂草':'低','小粒种子阔叶杂草':'低','杂草':'低','禾本科杂草':'低','阔叶杂草':'低'},
+    '芹菜': {'叶斑病':'低','增产':'低','斑枯病':'低','甜菜夜蛾':'低','蚜虫':'低','调节生长':'低'},
+    '苎麻': {'阔叶杂草':'低'},
+    '苗圃': {'阔叶杂草':'低'},
+    '苗床': {'一年生杂草':'低','小菜蛾':'低','控制生长':'低','猝倒病':'低','立枯病':'低','调节生长':'低','黄条跳甲':'低'},
+    '苦瓜': {'蚜虫':'低、中、高'},
+    '苹果园': {'一年生和多年生杂草':'低','一年生杂草':'低','杂草':'低','行间杂草':'低'},
+    '茄子': {'促进生长':'低','朱砂叶螨':'低','灰霉病':'低','白粉虱':'低','立枯病':'低','红蜘蛛':'低','蓟马':'低','蚜虫':'低'},
+    '茭白': {'二化螟':'低、中','胡麻斑病':'低、中'},
+    '茶园': {'一年生和多年生杂草':'低','一年生杂草':'低','杂草':'低','阔叶杂草':'低'},
+    '茶树': {'介壳虫':'低、中','刺蛾':'低、中','卷叶蛾':'低、中','增产':'低、中','害虫':'低、中','小绿叶蝉':'低、中','尺蠖':'低、中','炭疽病':'低、中','粉虱':'低、中','茶尺蠖':'低、中','茶橙瘿螨':'低、中','茶毛虫':'低、中','茶饼病':'低、中','茶黄螨':'低、中','蚜虫':'低、中','螨':'低、中','调节生长':'低、中','象甲':'低、中','长白蚧':'低、中','食叶害虫':'低、中','黑刺粉虱':'低、中'},
+    '草原': {'蝗虫':'低','阔叶杂草':'低'},
+    '草坪': {'一年生杂草':'低','一年生阔叶杂草':'低','东亚蝗虫':'低','叶斑病':'低','币斑病':'低','斜纹夜蛾':'低','杂草':'低','枯萎病':'低','禾本科杂草':'低','腐霉枯萎病':'低','草地螟':'低','蛴螬':'低','蝗虫':'低','褐斑病':'低','调节生长':'低','阔叶杂草':'低'},
+    '草莓': {'灰霉病':'低','白粉病':'低','红蜘蛛':'低','蚜虫':'低','调节生长':'低'},
+    '莲藕': {'叶斑病':'低','莲缢管蚜':'低'},
+    '莴笋': {'霜霉病':'低'},
+    '莴苣田': {'一年生杂草':'低','杂草':'低'},
+    '菜心': {'调节生长':'低'},
+    '菜瓜': {'白粉病':'低、中、高'},
+    '菜苔': {'炭疽病':'低'},
+    '菜豆': {'斑潜蝇':'低、中、高','白粉病':'低、中、高','美洲斑潜蝇':'低、中、高','蚜虫':'低、中、高','豆荚螟':'低、中、高','锈病':'低、中、高'},
+    '菠菜': {'增产':'低','调节生长':'低'},
+    '菠萝田': {'双子叶杂草':'低','增重':'低','果实增大':'低'},
+    '萝卜': {'小菜蛾':'低','甜菜夜蛾':'低','菜青虫':'低','蚜虫':'低'},
+    '蔬菜': {'小菜蛾':'低','病害':'低','菜蚜':'低','菜青虫':'低','蚜虫':'低','黄条跳甲':'低'},
+    '蔬菜地': {'杂草':'低'},
+    '蝗区': {'蝗虫':'低'},
+    '西瓜': {'叶斑病':'低','增产':'低','提高座果率':'低','提高座瓜率':'低','枯萎病':'低','棉铃虫':'低','炭疽病':'低','烟粉虱':'低','甜菜夜蛾':'低','疫病':'低','病毒病':'低','白粉病':'低','蓟马':'低','蔓枯病':'低','蚜虫':'低','角斑病':'低','调节生长':'低'},
+    '西瓜田': {'一年生杂草':'低','一年生禾本科杂草':'低','阔叶杂草':'低'},
+    '西葫芦': {'病毒病':'低、中、高','蚜虫':'低、中、高','霜霉病':'低、中、高'},
+    '观赏植物': {'叶斑病':'低、中','炭疽病':'低、中','锈病':'低、中'},
+    '观赏花卉': {'促矮化':'低','斜纹夜蛾':'低','灰霉病':'低','炭疽病':'低','烟粉虱':'低、中','白粉病':'低、中','红蜘蛛':'低、中','美洲斑潜蝇':'低、中','茶黄螨':'低','蓟马':'低、中','蚜虫':'低、中','褐斑病':'低','调节生长':'低、中','软腐病':'低','锈病':'低','霜霉病':'低、中'},
+    '谷子田': {'一年生阔叶杂草':'低','双子叶杂草':'低','黏虫':'低、中'},
+    '豆菜': {'调节生长':'低、中、高'},
+    '豇豆': {'大豆卷叶螟':'低、中','斜纹夜蛾':'低、中、高','白粉病':'低、中、高','美洲斑潜蝇':'低、中','蓟马':'低、中、高','蚜虫':'低、中','豆荚螟':'低、中','锈病':'低、中'},
+    '辣椒': {'一年生杂草':'低','枯萎病':'低、中','棉铃虫':'低、中','灰霉病':'低、中','炭疽病':'低、中','烟粉虱':'低、中','烟青虫':'低、中','甜菜夜蛾':'低、中','疫病':'低、中','疫霉病':'低、中','疮痂病':'低、中','病毒病':'低、中','白粉病':'低、中','白粉虱':'低、中','立枯病':'低','红蜘蛛':'低、中','茶黄螨':'低、中','蓟马':'低、中','蚜虫':'低、中','调节生长':'低、中'},
+    '针叶苗圃': {'杂草':'低'},
+    '青椒': {'炭疽病':'低'},
+    '青菜': {'地下害虫':'低','小菜蛾':'低','甜菜夜蛾':'低','菜青虫':'低'},
+    '非耕地': {'一年生和多年生杂草':'低','一年生杂草':'低','一年生阔叶杂草':'低','多年生杂草':'低','杂灌':'低、中','杂草':'低','灌木':'低','空心莲子草':'低','紫茎泽兰':'低、中','薇甘菊':'低','行间杂草':'低','钉螺':'低','阔叶杂草':'低','飞蝗':'低、中'},
+    '韭菜': {'灰霉病':'低','韭蛆':'低'},
+    '韭菜田': {'一年生杂草':'低','一年生禾本科杂草':'低','杂草':'低','阔叶杂草':'低'},
+    '食用菌': {'菌蛆':'低','螨':'低'},
+    '香蕉': {'催熟':'低'},
+    '香蕉园': {'杂草':'低','行间杂草':'低'},
+    '马铃薯': {'二十八星瓢虫':'低','早疫病':'低','晚疫病':'低','枯叶':'低','白粉虱':'低','蚜虫':'低','调节生长':'低','马铃薯块茎蛾':'低','黑痣病':'低'},
+    '马铃薯田': {'一年生杂草':'低','一年生禾本科杂草':'低'},
+    '高粱': {'一年生杂草':'低'},
+    '黄瓜': {'促进生长':'低、中、高','增产':'低、中、高','提高产量':'低、中、高','斑潜蝇':'低、中、高','斜纹夜蛾':'低、中、高','枯萎病':'低、中、高','根结线虫':'低','灰霉病':'低、中、高','炭疽病':'低、中、高','烟粉虱':'低、中、高','瓜绢螟':'低、中、高','疫病':'低、中、高','病害':'低、中、高','白粉病':'低、中、高','白粉虱':'低、中、高','立枯病':'低','细菌性角斑病':'低、中、高','美洲斑潜蝇':'低、中、高','蓟马':'低、中、高','蔓枯病':'低、中、高','蚜虫':'低、中、高','角斑病':'低、中、高','调节生长':'低、中、高','霜霉病':'低、中、高','靶斑病':'低、中、高','黑星病':'低、中、高'},
+    '黄麻': {'调节生长':'低、中、高'},
+  },
+};
+
+</script>
+<script>
+// utils.js — 公共工具函数
+
+function fmtNum(n) {
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 0.01 && abs < 1e6) return parseFloat(n.toPrecision(6)).toString();
+  return n.toExponential(4);
+}
+
+function resultHtml(value, unit) {
+  return `<div class="result-grid">
+    <div class="result-item">
+      <div class="result-item-label">换算结果</div>
+      <div class="result-item-value">${value} ${unit}</div>
+    </div>
+  </div>`;
+}
+
+function errHtml(msg) {
+  return `<div style="padding:12px 16px;background:var(--danger-bg);border-radius:6px;color:var(--danger);font-size:13px;">${msg}</div>`;
+}
+
+function detailHtml(items) {
+  return `<div style="margin-top:12px;padding:12px;background:#fafafa;border-radius:6px;">
+    ${items.map(i => `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;"><strong>${i.label}：</strong>${i.value}</div>`).join('')}
+  </div>`;
+}
+
+function calcStepsHtml(steps) {
+  return `<div style="margin-top:16px;padding:14px;background:#fafafa;border-radius:6px;">
+    <div style="font-size:12px;font-weight:600;color:var(--primary);margin-bottom:8px;">计算过程</div>
+    ${steps.map(s => `<div style="font-size:12px;color:var(--text);line-height:2;">${s}</div>`).join('')}
+  </div>`;
+}
+
+function renderTool(cfg) {
+  const panelId = App.currentTool;
+  return `<div class="tool-panel active" id="panel-${panelId}">
+    <div class="tool-card">
+      <div class="tool-card-title">${cfg.title}</div>
+      <div class="tool-card-desc">${cfg.desc}</div>
+      <div class="form-grid">
+        ${cfg.inputs.map(inp => {
+          if (inp.type === 'select') {
+            return `<div class="form-group">
+              <label class="form-label">${inp.label}</label>
+              <select class="form-select" id="${panelId}-${inp.id}">
+                ${inp.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+              </select>
+            </div>`;
+          }
+          return `<div class="form-group${inp.grid === 'full' ? ' full' : ''}">
+            <label class="form-label">${inp.label}</label>
+            <input class="form-input" type="number" id="${panelId}-${inp.id}"
+              placeholder="${inp.placeholder || ''}" step="any">
+            ${inp.hint ? `<span class="form-hint">${inp.hint}</span>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="btn-row">
+        <button class="btn-calculate" onclick="calculate('${panelId}')">&#9654; 计算</button>
+        <button class="btn-reset" onclick="resetTool('${panelId}')">&#8635; 重置</button>
+      </div>
+      <div class="result-area" id="result-${panelId}">
+        <div class="result-title">&#10003; 计算结果</div>
+        <div id="result-content-${panelId}"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+</script>
+<script>
+// converters.js — 单位换算：浓度、用量、稀释、面积、质量、体积
+
+// ====== 浓度换算 ======
+
+function concToggleGas(pid) {
+  const from = document.getElementById(`${pid}-from`).value;
+  const to = document.getElementById(`${pid}-to`).value;
+  document.getElementById(`${pid}-gas-fields`).style.display =
+    (from === 'mg/m³' || to === 'mg/m³') ? 'block' : 'none';
+  document.getElementById(`${pid}-liq-density-fields`).style.display =
+    ((from === 'mg/kg' && to === 'mg/L') || (from === 'mg/L' && to === 'mg/kg')) ? 'block' : 'none';
+}
+
+function calcConc(v) {
+  const val = parseFloat(v.val);
+  if (isNaN(val)) return errHtml('请输入有效数值');
+  const from = v.from, to = v.to;
+  const ppmPerUnit = { 'ppm':1, 'mg/kg':1, 'mg/L':1, '%':10000, 'ppb':0.001, 'μg/g':1 };
+  if (from === to) return resultHtml(val, to);
+
+  if ((from === 'mg/kg' && to === 'mg/L') || (from === 'mg/L' && to === 'mg/kg')) {
+    const liqDensity = parseFloat(v.liqDensity);
+    if (isNaN(liqDensity) || liqDensity <= 0) return errHtml('请输入有效的溶液密度');
+    const result = from === 'mg/kg' ? val * liqDensity : val / liqDensity;
+    return resultHtml(fmtNum(result), to) + detailHtml([
+      { label: '溶液密度', value: `${liqDensity} kg/L（${liqDensity === 1 ? '水溶液' : '非水溶液'}）` },
+    ]);
+  }
+
+  if (from !== 'mg/m³' && to !== 'mg/m³') {
+    const ppm = val * ppmPerUnit[from];
+    return resultHtml(fmtNum(ppm / ppmPerUnit[to]), to);
+  }
+
+  const mw = parseFloat(v.mw);
+  if (isNaN(mw) || mw <= 0) return errHtml('涉及 mg/m³ 换算时，请输入有效的分子量');
+  const tempC = parseFloat(v.temp) || 25;
+  const press = parseFloat(v.press) || 1013;
+  const ppmToMgm3 = mw / 22.4 * (273.15 / (273.15 + tempC)) * (press / 1013.25);
+  let result;
+  if (from === 'mg/m³') {
+    result = (val / ppmToMgm3) / ppmPerUnit[to];
+  } else {
+    result = (val * ppmPerUnit[from]) * ppmToMgm3;
+  }
+  return resultHtml(fmtNum(result), to) + detailHtml([
+    { label: '换算条件', value: `M = ${mw} g/mol, T = ${tempC}°C, P = ${press} hPa` },
+  ]);
+}
+
+// ====== 用量换算 ======
+
+function dosageUnitChanged(pid) {
+  const direction = document.getElementById(`${pid}-direction`).value;
+  const doseUnit = document.getElementById(`${pid}-doseUnit`).value;
+  const contentUnit = document.getElementById(`${pid}-contentUnit`).value;
+  const isFwd = direction === 'dose2ai';
+
+  document.getElementById(`${pid}-fg-doseUnit`).style.display = isFwd ? '' : 'none';
+  document.getElementById(`${pid}-fg-aiUnit`).style.display = isFwd ? 'none' : '';
+  document.getElementById(`${pid}-lbl-val`).textContent = isFwd ? '制剂用量' : '有效成分用量';
+
+  const needDensity = (doseUnit === 'mL/亩' && contentUnit === '%') || (doseUnit === 'L/公顷' && contentUnit === '%');
+  document.getElementById(`${pid}-density-fields`).style.display = needDensity ? 'block' : 'none';
+
+  const fwd = {
+    'mL/亩|g/L': `g a.i./亩 = 制剂用量(mL/亩) × 含量(g/L) ÷ 1000<br>g a.i./公顷 = 制剂用量(mL/亩) × 含量(g/L) ÷ 1000 × 15`,
+    'mL/亩|%':   `g a.i./亩 = 制剂用量(mL/亩) × 密度(g/mL) × 含量(%)<br>g a.i./公顷 = 制剂用量(mL/亩) × 密度(g/mL) × 含量(%) × 15`,
+    'g/亩|%':    `g a.i./亩 = 制剂用量(g/亩) × 含量(%)<br>g a.i./公顷 = 制剂用量(g/亩) × 含量(%) × 15`,
+    'g/公顷|%':  `g a.i./亩 = 制剂用量(g/公顷) × 含量(%) ÷ 15<br>g a.i./公顷 = 制剂用量(g/公顷) × 含量(%)`,
+    'L/公顷|g/L':`g a.i./亩 = 制剂用量(L/公顷) × 含量(g/L) ÷ 15<br>g a.i./公顷 = 制剂用量(L/公顷) × 含量(g/L)`,
+    'L/公顷|%':  `g a.i./亩 = 制剂用量(L/公顷) × 密度(kg/L) × 含量(%)<br>g a.i./公顷 = 制剂用量(L/公顷) × 密度(kg/L) × 含量(%) × 15`,
+  };
+  const aiUnit = document.getElementById(`${pid}-aiUnit`)?.value || 'g a.i./亩';
+  const aiLabel = aiUnit === 'g a.i./亩' ? 'g a.i./亩' : 'g a.i./公顷';
+  const rev = {
+    'mL/亩|g/L': `制剂用量(mL/亩) = 有效成分用量(${aiLabel}) × 1000 ÷ 含量(g/L)${aiUnit === 'g a.i./公顷' ? ' ÷ 15' : ''}`,
+    'mL/亩|%':   `制剂用量(mL/亩) = 有效成分用量(${aiLabel}) ÷ 密度(g/mL) ÷ 含量(%)${aiUnit === 'g a.i./公顷' ? ' ÷ 15' : ''}`,
+    'g/亩|%':    `制剂用量(g/亩) = 有效成分用量(${aiLabel}) ÷ 含量(%)${aiUnit === 'g a.i./公顷' ? ' ÷ 15' : ''}`,
+    'g/公顷|%':  `制剂用量(g/公顷) = 有效成分用量(${aiLabel})${aiUnit === 'g a.i./亩' ? ' × 15' : ''} ÷ 含量(%)`,
+    'L/公顷|g/L':`制剂用量(L/公顷) = 有效成分用量(${aiLabel})${aiUnit === 'g a.i./亩' ? ' × 15' : ''} ÷ 含量(g/L)`,
+    'L/公顷|%':  `制剂用量(L/公顷) = 有效成分用量(${aiLabel}) ÷ 密度(kg/L) ÷ 含量(%)${aiUnit === 'g a.i./公顷' ? ' ÷ 15' : ''}`,
+  };
+  const key = `${doseUnit}|${contentUnit}`;
+  const f = direction === 'dose2ai' ? fwd[key] : rev[key];
+  const hint = document.getElementById(`${pid}-formula-hint`);
+  hint.innerHTML = f ? `<div style="padding:12px 14px;background:var(--primary-lighter);border-radius:6px;font-size:12px;color:var(--primary-dark);line-height:1.8;"><strong>计算公式：</strong><br>${f}</div>` : '';
+}
+
+function calcDosage(v) {
+  const direction = v.direction;
+  const inputVal = parseFloat(v.val);
+  if (isNaN(inputVal) || inputVal <= 0) return errHtml(direction === 'dose2ai' ? '请输入有效的制剂用量' : '请输入有效的有效成分用量');
+  const content = parseFloat(v.content);
+  if (isNaN(content) || content <= 0) return errHtml('请输入有效的有效成分含量');
+
+  const doseUnit = v.doseUnit, contentUnit = v.contentUnit;
+  const combo = `${doseUnit}|${contentUnit}`;
+  let steps = [];
+
+  function getDensity() {
+    const d = parseFloat(v.density);
+    return (isNaN(d) || d <= 0) ? null : d;
+  }
+
+  if (direction === 'dose2ai') {
+    let perMu, perHa;
+    switch (combo) {
+      case 'mL/亩|g/L':
+        perMu = inputVal * content / 1000; perHa = perMu * 15;
+        steps = [`g a.i./亩 = ${inputVal} mL/亩 × ${content} g/L ÷ 1000 = <strong>${fmtNum(perMu)} g a.i./亩</strong>`, `g a.i./公顷 = ${inputVal} mL/亩 × ${content} g/L ÷ 1000 × 15 = <strong>${fmtNum(perHa)} g a.i./公顷</strong>`];
+        break;
+      case 'mL/亩|%': {
+        const d = getDensity(); if (!d) return errHtml('当前组合需要输入制剂密度');
+        perMu = inputVal * d * (content / 100); perHa = perMu * 15;
+        steps = [`g a.i./亩 = ${inputVal} mL/亩 × ${d} g/mL × ${content}% = <strong>${fmtNum(perMu)} g a.i./亩</strong>`, `g a.i./公顷 = ${inputVal} mL/亩 × ${d} g/mL × ${content}% × 15 = <strong>${fmtNum(perHa)} g a.i./公顷</strong>`];
+        break;
+      }
+      case 'g/亩|%':
+        perMu = inputVal * (content / 100); perHa = perMu * 15;
+        steps = [`g a.i./亩 = ${inputVal} g/亩 × ${content}% = <strong>${fmtNum(perMu)} g a.i./亩</strong>`, `g a.i./公顷 = ${inputVal} g/亩 × ${content}% × 15 = <strong>${fmtNum(perHa)} g a.i./公顷</strong>`];
+        break;
+      case 'g/公顷|%':
+        perHa = inputVal * (content / 100); perMu = perHa / 15;
+        steps = [`g a.i./公顷 = ${inputVal} g/公顷 × ${content}% = <strong>${fmtNum(perHa)} g a.i./公顷</strong>`, `g a.i./亩 = ${inputVal} g/公顷 × ${content}% ÷ 15 = <strong>${fmtNum(perMu)} g a.i./亩</strong>`];
+        break;
+      case 'L/公顷|g/L':
+        perHa = inputVal * content; perMu = perHa / 15;
+        steps = [`g a.i./公顷 = ${inputVal} L/公顷 × ${content} g/L = <strong>${fmtNum(perHa)} g a.i./公顷</strong>`, `g a.i./亩 = ${inputVal} L/公顷 × ${content} g/L ÷ 15 = <strong>${fmtNum(perMu)} g a.i./亩</strong>`];
+        break;
+      case 'L/公顷|%': {
+        const d = getDensity(); if (!d) return errHtml('当前组合需要输入制剂密度');
+        perMu = inputVal * d * (content / 100); perHa = perMu * 15;
+        steps = [`g a.i./亩 = ${inputVal} L/公顷 × ${d} kg/L × ${content}% = <strong>${fmtNum(perMu)} g a.i./亩</strong>`, `g a.i./公顷 = ${inputVal} L/公顷 × ${d} kg/L × ${content}% × 15 = <strong>${fmtNum(perHa)} g a.i./公顷</strong>`];
+        break;
+      }
+      default: return errHtml('当前单位组合暂不支持');
+    }
+    return `<div class="result-grid">
+      <div class="result-item success"><div class="result-item-label">有效成分用量（每亩）</div><div class="result-item-value success">${fmtNum(perMu)} g a.i./亩</div></div>
+      <div class="result-item success"><div class="result-item-label">有效成分用量（每公顷）</div><div class="result-item-value success">${fmtNum(perHa)} g a.i./公顷</div></div>
+    </div>${calcStepsHtml(steps)}`;
+  }
+
+  // 反向：有效成分 → 制剂
+  const aiUnit = v.aiUnit || 'g a.i./亩';
+  const perMu = aiUnit === 'g a.i./亩';
+  let doseMu, doseHa, baseUnit;
+  switch (combo) {
+    case 'mL/亩|g/L':
+      doseMu = perMu ? inputVal * 1000 / content : inputVal * 1000 / content / 15; doseHa = doseMu * 15; baseUnit = 'mL';
+      steps = [`每亩制剂用量 = ${inputVal} ${aiUnit} × 1000 ÷ ${content} g/L${perMu ? '' : ' ÷ 15'} = <strong>${fmtNum(doseMu)} mL/亩</strong>`]; break;
+    case 'mL/亩|%': {
+      const d = getDensity(); if (!d) return errHtml('当前组合需要输入制剂密度');
+      doseMu = perMu ? inputVal / d / (content / 100) : inputVal / d / (content / 100) / 15; doseHa = doseMu * 15; baseUnit = 'mL';
+      steps = [`每亩制剂用量 = ${inputVal} ${aiUnit} ÷ ${d} g/mL ÷ ${content}%${perMu ? '' : ' ÷ 15'} = <strong>${fmtNum(doseMu)} mL/亩</strong>`]; break;
+    }
+    case 'g/亩|%':
+      doseMu = perMu ? inputVal / (content / 100) : inputVal / (content / 100) / 15; doseHa = doseMu * 15; baseUnit = 'g';
+      steps = [`每亩制剂用量 = ${inputVal} ${aiUnit} ÷ ${content}%${perMu ? '' : ' ÷ 15'} = <strong>${fmtNum(doseMu)} g/亩</strong>`]; break;
+    case 'g/公顷|%':
+      doseHa = perMu ? inputVal * 15 / (content / 100) : inputVal / (content / 100); doseMu = doseHa / 15; baseUnit = 'g';
+      steps = [`每公顷制剂用量 = ${inputVal} ${aiUnit}${perMu ? ' × 15' : ''} ÷ ${content}% = <strong>${fmtNum(doseHa)} g/公顷</strong>`]; break;
+    case 'L/公顷|g/L':
+      doseHa = perMu ? inputVal * 15 / content : inputVal / content; doseMu = doseHa / 15; baseUnit = 'L';
+      steps = [`每公顷制剂用量 = ${inputVal} ${aiUnit}${perMu ? ' × 15' : ''} ÷ ${content} g/L = <strong>${fmtNum(doseHa)} L/公顷</strong>`]; break;
+    case 'L/公顷|%': {
+      const d = getDensity(); if (!d) return errHtml('当前组合需要输入制剂密度');
+      doseHa = perMu ? inputVal / d / (content / 100) / 15 : inputVal / d / (content / 100); doseMu = doseHa / 15; baseUnit = 'L';
+      steps = [`每公顷制剂用量 = ${inputVal} ${aiUnit} ÷ ${d} kg/L ÷ ${content}%${perMu ? ' ÷ 15' : ''} = <strong>${fmtNum(doseHa)} L/公顷</strong>`]; break;
+    }
+    default: return errHtml('当前单位组合暂不支持');
+  }
+  steps.push(`每公顷制剂用量 = ${fmtNum(doseMu)} ${baseUnit}/亩 × 15 = <strong>${fmtNum(doseHa)} ${baseUnit}/公顷</strong>`);
+  return `<div class="result-grid">
+    <div class="result-item success"><div class="result-item-label">制剂用量（每亩）</div><div class="result-item-value success">${fmtNum(doseMu)} ${baseUnit}/亩</div></div>
+    <div class="result-item success"><div class="result-item-label">制剂用量（每公顷）</div><div class="result-item-value success">${fmtNum(doseHa)} ${baseUnit}/公顷</div></div>
+  </div>${calcStepsHtml(steps)}`;
+}
+
+// ====== 稀释换算 ======
+
+function dilutionModeChanged(pid) {
+  const mode = document.getElementById(`${pid}-mode`).value;
+  const cfg = {
+    'tank_ml': { showRatio:true, showWater:true, showDose:false, showDensity:false, showAi:false, waterLabel:'药桶容量 (L)' },
+    'tank_g':  { showRatio:true, showWater:true, showDose:false, showDensity:true,  showAi:false, waterLabel:'药桶容量 (L)' },
+    'mu_dose': { showRatio:true, showWater:true, showDose:false, showDensity:false, showAi:false, waterLabel:'亩兑水量 (L)' },
+    'mu_water':{ showRatio:true, showWater:false, showDose:true,  showDensity:false, showAi:false, waterLabel:'' },
+    'calc_ratio':{ showRatio:false, showWater:true, showDose:false, showDensity:false, showAi:true, waterLabel:'每亩兑水量 (L)' },
+  }[mode];
+
+  document.getElementById(`${pid}-fg-ratio`).style.display = cfg.showRatio ? '' : 'none';
+  document.getElementById(`${pid}-fg-water`).style.display = cfg.showWater ? '' : 'none';
+  document.getElementById(`${pid}-fg-dose`).style.display = cfg.showDose ? '' : 'none';
+  document.getElementById(`${pid}-density-fields`).style.display = cfg.showDensity ? 'block' : 'none';
+  document.getElementById(`${pid}-ai-fields`).style.display = cfg.showAi ? 'block' : 'none';
+  document.getElementById(`${pid}-lbl-water`).textContent = cfg.waterLabel;
+
+  const formulas = {
+    'tank_ml': `每桶制剂用药量(mL) = 药桶容量(L) × 1000 ÷ 稀释倍数`,
+    'tank_g':  `每桶制剂用药量(g) = 药桶容量(L) × 1000 × 制剂密度(g/mL) ÷ 稀释倍数`,
+    'mu_dose': `每亩制剂用量(mL 或 g) = 亩兑水量(L) × 1000 ÷ 稀释倍数<br><br><em>提示：果树常按稀释倍数喷雾（1500~2000倍），常规亩用水量 30~45 公斤/亩</em>`,
+    'mu_water':`兑水量(L) = 制剂用量(mL 或 g) × 稀释倍数 ÷ 1000<br>兑水量(斤) = 制剂用量(mL 或 g) × 稀释倍数 ÷ 500`,
+    'calc_ratio':`稀释倍数 = 每亩兑水量(L) × 1000 ÷ 每亩制剂用量(g或mL)<br>每亩制剂用量 = 有效成分用量(g a.i./公顷) ÷ 15 ÷ 含量(%)`,
+  };
+  document.getElementById(`${pid}-formula-hint`).innerHTML = `<div style="padding:12px 14px;background:var(--primary-lighter);border-radius:6px;font-size:12px;color:var(--primary-dark);line-height:1.8;"><strong>计算公式：</strong><br>${formulas[mode]}</div>`;
+}
+
+function calcDilution(v) {
+  const mode = v.mode;
+  let steps = [], resultLabel, resultValue;
+
+  if (mode === 'calc_ratio') {
+    const water = parseFloat(v.water), aiAmount = parseFloat(v.aiAmount), aiContent = parseFloat(v.aiContent);
+    if (isNaN(water) || water <= 0) return errHtml('请输入有效的每亩兑水量');
+    if (isNaN(aiAmount) || aiAmount <= 0) return errHtml('请输入有效的有效成分用量');
+    if (isNaN(aiContent) || aiContent <= 0) return errHtml('请输入有效的有效成分含量');
+    const dosePerMu = aiAmount / 15 / (aiContent / 100);
+    const ratio = water * 1000 / dosePerMu;
+    steps = [`每亩制剂用量 = ${aiAmount} g a.i./公顷 ÷ 15 ÷ ${aiContent}% = <strong>${fmtNum(dosePerMu)} g/亩</strong>`,
+      `稀释倍数 = ${water} L × 1000 ÷ ${fmtNum(dosePerMu)} = <strong>${fmtNum(ratio)} 倍</strong>`];
+    return `<div class="result-grid"><div class="result-item success"><div class="result-item-label">稀释倍数</div><div class="result-item-value success">${fmtNum(ratio)} 倍</div></div></div>${calcStepsHtml(steps)}`;
+  }
+
+  const ratio = parseFloat(v.ratio);
+  if (isNaN(ratio) || ratio <= 0) return errHtml('请输入有效的稀释倍数');
+
+  switch (mode) {
+    case 'tank_ml': {
+      const water = parseFloat(v.water);
+      if (isNaN(water) || water <= 0) return errHtml('请输入有效的药桶容量');
+      const result = water * 1000 / ratio;
+      steps = [`每桶制剂用药量 = ${water} L × 1000 ÷ ${ratio} = <strong>${fmtNum(result)} mL</strong>`];
+      resultLabel = '每桶制剂用药量'; resultValue = `${fmtNum(result)} mL`; break;
+    }
+    case 'tank_g': {
+      const water = parseFloat(v.water), density = parseFloat(v.density);
+      if (isNaN(water) || water <= 0) return errHtml('请输入有效的药桶容量');
+      if (isNaN(density) || density <= 0) return errHtml('请输入有效的制剂密度');
+      const result = water * 1000 * density / ratio;
+      steps = [`每桶制剂用药量 = ${water} L × 1000 × ${density} g/mL ÷ ${ratio} = <strong>${fmtNum(result)} g</strong>`];
+      resultLabel = '每桶制剂用药量'; resultValue = `${fmtNum(result)} g`; break;
+    }
+    case 'mu_dose': {
+      const water = parseFloat(v.water);
+      if (isNaN(water) || water <= 0) return errHtml('请输入有效的亩兑水量');
+      const result = water * 1000 / ratio;
+      steps = [`每亩制剂用量 = ${water} L × 1000 ÷ ${ratio} = <strong>${fmtNum(result)} mL 或 g</strong>`];
+      resultLabel = '每亩制剂用量'; resultValue = `${fmtNum(result)} mL 或 g`; break;
+    }
+    case 'mu_water': {
+      const dose = parseFloat(v.dose);
+      if (isNaN(dose) || dose <= 0) return errHtml('请输入有效的制剂用量');
+      const resultL = dose * ratio / 1000, resultJin = dose * ratio / 500;
+      steps = [`兑水量(L) = ${dose} × ${ratio} ÷ 1000 = <strong>${fmtNum(resultL)} L</strong>`,
+        `兑水量(斤) = ${dose} × ${ratio} ÷ 500 = <strong>${fmtNum(resultJin)} 斤</strong>`];
+      return `<div class="result-grid"><div class="result-item success"><div class="result-item-label">兑水量</div><div class="result-item-value success">${fmtNum(resultL)} L（${fmtNum(resultJin)} 斤）</div></div></div>${calcStepsHtml(steps)}`;
+    }
+  }
+  return `<div class="result-grid"><div class="result-item success"><div class="result-item-label">${resultLabel}</div><div class="result-item-value success">${resultValue}</div></div></div>${calcStepsHtml(steps)}`;
+}
+
+// ====== 面积换算 ======
+
+function calcArea(v) {
+  const val = parseFloat(v.val);
+  if (isNaN(val)) return errHtml('请输入有效数值');
+  const from = v.from, to = v.to;
+  if (from === to) return resultHtml(val, to);
+  const toM2 = { '亩':666.667, '公顷 (ha)':10000, '平方米 (m²)':1, '英亩 (acre)':4046.86, '平方英尺 (ft²)':0.092903 };
+  const result = val * toM2[from] / toM2[to];
+  return resultHtml(fmtNum(result), to) + detailHtml([{ label: '换算系数', value: `1 ${from} = ${fmtNum(toM2[from] / toM2[to])} ${to}` }]);
+}
+
+// ====== 质量换算 ======
+
+function calcMass(v) {
+  const val = parseFloat(v.val);
+  if (isNaN(val)) return errHtml('请输入有效数值');
+  const from = v.from, to = v.to;
+  if (from === to) return resultHtml(val, to);
+  const toG = { '毫克 (mg)':0.001, '克 (g)':1, '千克 (kg)':1000, '斤':500, '磅 (lb)':453.592, '盎司 (oz)':28.3495 };
+  const result = val * toG[from] / toG[to];
+  return resultHtml(fmtNum(result), to) + detailHtml([{ label: '换算系数', value: `1 ${from} = ${fmtNum(toG[from] / toG[to])} ${to}` }]);
+}
+
+// ====== 体积换算 ======
+
+function calcVolume(v) {
+  const val = parseFloat(v.val);
+  if (isNaN(val)) return errHtml('请输入有效数值');
+  const from = v.from, to = v.to;
+  if (from === to) return resultHtml(val, to);
+  const toL = { '毫升 (mL)':0.001, '升 (L)':1, '美制加仑 (gal/US)':3.78541, '英制加仑 (gal/UK)':4.54609, '液体盎司 (fl oz/US)':0.0295735 };
+  const result = val * toL[from] / toL[to];
+  return resultHtml(fmtNum(result), to) + detailHtml([{ label: '换算系数', value: `1 ${from} = ${fmtNum(toL[from] / toL[to])} ${to}` }]);
+}
+
+</script>
+<script>
+// toxicity.js — 毒性分级：急性毒性、生态毒性、对照表
+
+function acuteRouteChanged(pid) {
+  const route = document.getElementById(`${pid}-route`).value;
+  const labels = { oral: '经口 LD50 (mg/kg)', dermal: '经皮 LD50 (mg/kg)', inhal: '吸入 LC50 (mg/m³, 4h)' };
+  document.getElementById(`${pid}-lbl-val`).textContent = labels[route] || '毒性数值';
+}
+
+function ecoOrganismChanged(pid) {
+  const org = document.getElementById(`${pid}-organism`).value;
+  const units = {
+    fish:'mg a.i./L', daphnia:'mg a.i./L', crustacean:'mg a.i./L', algae:'mg a.i./L',
+    bird_oral:'mg a.i./kg体重', bird_diet:'mg a.i./kg饲料', bee:'μg a.i./蜂',
+    silkworm:'mg a.i./L', trichogramma:'无', amphibian:'mg a.i./L',
+    earthworm:'mg a.i./kg干土', plant:'mg a.i./L', livestock:'mg a.i./kg饲料',
+  };
+  const unitEl = document.getElementById(`${pid}-unit-display`);
+  if (unitEl) unitEl.textContent = units[org] || '';
+}
+
+function calcAcuteTox(v) {
+  const val = parseFloat(v.val);
+  if (isNaN(val) || val <= 0) return errHtml('请输入有效的毒性数值');
+  const route = v.route;
+  const routeLabels = { oral:'经口 LD50', dermal:'经皮 LD50', inhal:'吸入 LC50' };
+  const routeUnit = { oral:'mg/kg', dermal:'mg/kg', inhal:'mg/m³' };
+
+  const chinaThresh = {
+    oral:   [[5,'剧毒','level-1'],[50,'高毒','level-2'],[500,'中等毒','level-3'],[5000,'低毒','level-4']],
+    dermal: [[20,'剧毒','level-1'],[200,'高毒','level-2'],[2000,'中等毒','level-3'],[5000,'低毒','level-4']],
+    inhal:  [[20,'剧毒','level-1'],[200,'高毒','level-2'],[2000,'中等毒','level-3'],[5000,'低毒','level-4']],
+  };
+  function getChina(v) {
+    for (const [max, name, c] of chinaThresh[route]) { if (v <= max) return { name, c, basis: `≤${max}` }; }
+    return { name: '微毒', c: 'level-5', basis: `＞${chinaThresh[route][3][0]}` };
+  }
+
+  const whoThresh = {
+    oral:   [[5,'Ia 剧毒（Extremely hazardous）','level-1','＜5'],[50,'Ib 高毒（Highly hazardous）','level-2','＞5～≤50'],[2000,'II 中等毒（Moderately hazardous）','level-3','＞50～≤2000'],[5000,'III 低毒（Slightly hazardous）','level-4','＞2000～≤5000']],
+    dermal: [[50,'Ia 剧毒（Extremely hazardous）','level-1','＜50'],[200,'Ib 高毒（Highly hazardous）','level-2','＞50～≤200'],[2000,'II 中等毒（Moderately hazardous）','level-3','＞200～≤2000'],[5000,'III 低毒（Slightly hazardous）','level-4','＞2000～≤5000']],
+  };
+  function getWHO(v) {
+    if (route === 'inhal') return { name: '无吸入分级', c: 'level-5', basis: 'WHO 2019 标准仅覆盖经口和经皮途径' };
+    for (const [max, name, c, basis] of whoThresh[route]) { if (v <= max) return { name, c, basis }; }
+    return { name: 'U 正常使用无急性危害', c: 'level-5', basis: '＞5000' };
+  }
+
+  const ghsThresh = {
+    oral:   [[5,'≤5'],[50,'＞5～≤50'],[300,'＞50～≤300'],[2000,'＞300～≤2000'],[5000,'＞2000～≤5000']],
+    dermal: [[50,'≤50'],[200,'＞50～≤200'],[1000,'＞200～≤1000'],[2000,'＞1000～≤2000'],[5000,'＞2000～≤5000']],
+  };
+  const ghsDustThresh = [[0.05,'≤0.05'],[0.5,'＞0.05～≤0.5'],[1.0,'＞0.5～≤1.0'],[5.0,'＞1.0～≤5.0']];
+  function getGHS(v) {
+    if (route === 'oral' || route === 'dermal') {
+      for (let i = 0; i < ghsThresh[route].length; i++) {
+        if (v <= ghsThresh[route][i][0]) return { cat: i+1, c: `level-${i+1}`, basis: ghsThresh[route][i][1] + ' mg/kg' };
+      }
+      return { cat: 6, c: 'level-5', basis: '＞5000 mg/kg' };
+    }
+    const valMgL = v / 1000;
+    for (let i = 0; i < ghsDustThresh.length; i++) {
+      if (valMgL <= ghsDustThresh[i][0]) return { cat: i+1, c: `level-${i+1}`, basis: `${valMgL} mg/L（${ghsDustThresh[i][1]} mg/L）` };
+    }
+    return { cat: 5, c: 'level-5', basis: `${fmtNum(valMgL)} mg/L（＞5.0 mg/L）` };
+  }
+
+  const china = getChina(val), who = getWHO(val), ghs = getGHS(val);
+  const ghsName = ghs.cat <= 5 ? `类别 ${ghs.cat}` : '未分类（超出类别5）';
+  const ghsNote = route === 'inhal' ? `<div style="margin-top:8px;font-size:11px;color:var(--text-muted);">* GHS 分级基于粉尘/雾滴标准（mg/L, 4h），已将 ${val} mg/m³ 自动换算为 ${fmtNum(val/1000)} mg/L 后比对</div>` : '';
+
+  return `<div class="result-grid">
+    <div class="result-item ${china.c}"><div class="result-item-label">中国农药毒性分级</div><div class="result-item-value"><span class="tox-badge ${china.c}">${china.name}</span></div></div>
+    <div class="result-item ${who.c}"><div class="result-item-label">WHO 危害分级</div><div class="result-item-value"><span class="tox-badge ${who.c}">${who.name}</span></div></div>
+    <div class="result-item ${ghs.c}"><div class="result-item-label">GHS 急性毒性</div><div class="result-item-value"><span class="tox-badge ${ghs.c}">${ghsName}</span></div></div>
+  </div>
+  <div style="margin-top:16px;padding:14px;background:#fafafa;border-radius:6px;">
+    <div style="font-size:12px;font-weight:600;color:var(--primary);margin-bottom:8px;">输入参数</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.8;">${routeLabels[route]} = <strong>${val} ${routeUnit[route]}</strong></div>
+    ${ghsNote}
+    <div style="margin-top:12px;font-size:12px;font-weight:600;color:var(--primary);margin-bottom:8px;">判断依据</div>
+    <div style="font-size:12px;color:var(--text);line-height:2;">
+      <div>中国分级：<strong>${china.name}</strong>（${routeLabels[route]} ${china.basis} ${routeUnit[route]}）</div>
+      <div>WHO 分级：<strong>${who.name}</strong>（${routeLabels[route]} ${who.basis} ${route === 'inhal' ? 'mg/m³' : 'mg/kg'}）</div>
+      <div>GHS 分类：<strong>${ghsName}</strong>（${route === 'inhal' ? '粉尘/雾滴标准 ' : ''}${ghs.basis}）</div>
+    </div>
+  </div>`;
+}
+
+function calcEcoTox(v) {
+  const val = parseFloat(v.val);
+  if (isNaN(val) || val <= 0) return errHtml('请输入有效的毒性数值');
+  const org = v.organism;
+
+  const ecoDefs = {
+    fish:         ['鱼类','LC50(96h)','mg a.i./L',       [[0.1,'剧毒','level-1','≤0.1'],[1.0,'高毒','level-2','0.1~1.0'],[10,'中毒','level-3','1.0~10']]],
+    daphnia:      ['溞类','EC50(48h)','mg a.i./L',       [[0.1,'剧毒','level-1','≤0.1'],[1.0,'高毒','level-2','0.1~1.0'],[10,'中毒','level-3','1.0~10']]],
+    crustacean:   ['大型甲壳类','LC50(96h)','mg a.i./L', [[0.1,'剧毒','level-1','≤0.1'],[1.0,'高毒','level-2','0.1~1.0'],[10,'中毒','level-3','1.0~10']]],
+    algae:        ['藻类','EC50(72h)','mg a.i./L',       [[0.3,'高毒','level-2','≤0.3'],[3.0,'中毒','level-3','0.3~3.0']]],
+    bird_oral:    ['鸟类(经口)','LD50','mg a.i./kg体重', [[10,'剧毒','level-1','≤10'],[50,'高毒','level-2','10~50'],[500,'中毒','level-3','50~500']]],
+    bird_diet:    ['鸟类(饲喂)','LC50','mg a.i./kg饲料', [[50,'剧毒','level-1','≤50'],[500,'高毒','level-2','50~500'],[1000,'中毒','level-3','500~1000']]],
+    bee:          ['蜜蜂','LD50(48h)','μg a.i./蜂',      [[0.001,'剧毒','level-1','≤0.001'],[2.0,'高毒','level-2','0.001~2.0'],[11.0,'中毒','level-3','2.0~11.0']]],
+    silkworm:     ['家蚕','LC50(96h)','mg a.i./L',       [[0.5,'剧毒','level-1','≤0.5'],[20,'高毒','level-2','0.5~20'],[200,'中毒','level-3','20~200']]],
+    trichogramma: ['天敌赤眼蜂','安全系数','无',          [[0.05,'剧毒','level-1','≤0.05'],[0.5,'高毒','level-2','0.05~0.5'],[5,'中毒','level-3','0.5~5']]],
+    amphibian:    ['天敌两栖类','LC50(96h)','mg a.i./L', [[0.1,'剧毒','level-1','≤0.1'],[1.0,'高毒','level-2','0.1~1.0'],[10,'中毒','level-3','1.0~10']]],
+    earthworm:    ['蚯蚓','LC50(14d)','mg a.i./kg干土',  [[0.1,'剧毒','level-1','≤0.1'],[1.0,'高毒','level-2','0.1~1.0'],[10,'中毒','level-3','1.0~10']]],
+    plant:        ['非靶标植物','EC50','mg a.i./L',       [[0.1,'剧毒','level-1','≤0.1'],[1.0,'高毒','level-2','0.1~1.0'],[10,'中毒','level-3','1.0~10']]],
+    livestock:    ['家畜','LC50(28d)','mg a.i./kg饲料',  [[10,'剧毒','level-1','≤10'],[100,'高毒','level-2','10~100'],[1000,'中毒','level-3','100~1000']]],
+  };
+
+  const def = ecoDefs[org];
+  if (!def) return errHtml('未知的测试生物类型');
+  const [label, indicator, unit, thresholds] = def;
+
+  let levelName, levelColor, rangeText;
+  for (const [upper, name, color, range] of thresholds) {
+    if (val <= upper) { levelName = name; levelColor = color; rangeText = range; break; }
+  }
+  if (!levelName) {
+    levelName = '低毒'; levelColor = 'level-4';
+    rangeText = '＞' + thresholds[thresholds.length - 1][0];
+  }
+
+  return `<div class="result-grid">
+    <div class="result-item ${levelColor}"><div class="result-item-label">生态毒性等级</div><div class="result-item-value"><span class="tox-badge ${levelColor}">${levelName}</span></div></div>
+  </div>
+  <div style="margin-top:16px;padding:14px;background:#fafafa;border-radius:6px;">
+    <div style="font-size:12px;font-weight:600;color:var(--primary);margin-bottom:8px;">输入参数</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.8;">${label} ${indicator} = <strong>${val} ${unit === '无' ? '' : unit}</strong></div>
+    <div style="margin-top:12px;font-size:12px;font-weight:600;color:var(--primary);margin-bottom:8px;">判断依据</div>
+    <div style="font-size:12px;color:var(--text);line-height:2;">
+      <div>${label}：<strong>${levelName}</strong>（${indicator} ${rangeText} ${unit === '无' ? '' : unit}）</div>
+    </div>
+  </div>`;
+}
+
+// ====== 毒性对照表（纯展示） ======
+
+function renderRefTable() {
+  return `<div class="tool-panel active" id="panel-${App.currentTool}">
+    <div class="tool-card">
+      <div class="tool-card-title">毒性分级对照表</div>
+      <div class="tool-card-desc">中国、WHO 和 GHS 三套急性毒性分级标准对照。</div>
+      <h3 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:8px;">中国农药毒性分级（NY/T 4594-2025）</h3>
+      <div class="ref-table-wrap" style="margin-bottom:24px;">
+        <table class="ref-table"><thead><tr><th>毒性等级</th><th>经口 LD50 (mg/kg)</th><th>经皮 LD50 (mg/kg)</th><th>吸入 LC50 (mg/m³)</th></tr></thead>
+        <tbody>
+          <tr><td class="level-cell"><span class="tox-badge level-1">剧毒</span></td><td>≤5</td><td>≤20</td><td>≤20</td></tr>
+          <tr><td class="level-cell"><span class="tox-badge level-2">高毒</span></td><td>&gt;5 ~ 50</td><td>&gt;20 ~ 200</td><td>&gt;20 ~ 200</td></tr>
+          <tr><td class="level-cell"><span class="tox-badge level-3">中等毒</span></td><td>&gt;50 ~ 500</td><td>&gt;200 ~ 2000</td><td>&gt;200 ~ 2000</td></tr>
+          <tr><td class="level-cell"><span class="tox-badge level-4">低毒</span></td><td>&gt;500 ~ 5000</td><td>&gt;2000 ~ 5000</td><td>&gt;2000 ~ 5000</td></tr>
+          <tr><td class="level-cell"><span class="tox-badge level-5">微毒</span></td><td>&gt;5000</td><td>&gt;5000</td><td>&gt;5000</td></tr>
+        </tbody></table>
+      </div>
+      <h3 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:8px;">WHO 农药危害分级 (2019)</h3>
+      <div style="padding:10px 14px;background:var(--info-bg);border-radius:6px;margin-bottom:8px;font-size:12px;color:var(--info);">WHO 2019 标准仅覆盖急性经口和经皮途径，无吸入分级。</div>
+      <div class="ref-table-wrap" style="margin-bottom:24px;">
+        <table class="ref-table"><thead><tr><th>WHO 等级</th><th>危害程度</th><th>经口 LD50 (mg/kg)</th><th>经皮 LD50 (mg/kg)</th></tr></thead>
+        <tbody>
+          <tr><td class="level-cell">Ia</td><td>极度危害 (Extremely hazardous)</td><td>＜5</td><td>＜50</td></tr>
+          <tr><td class="level-cell">Ib</td><td>高度危害 (Highly hazardous)</td><td>5 ～ 50</td><td>50 ～ 200</td></tr>
+          <tr><td class="level-cell">II</td><td>中度危害 (Moderately hazardous)</td><td>＞50 ～ 2000</td><td>＞200 ～ 2000</td></tr>
+          <tr><td class="level-cell">III</td><td>轻度危害 (Slightly hazardous)</td><td>＞2000 ～ 5000</td><td>＞2000 ～ 5000</td></tr>
+          <tr><td class="level-cell">U</td><td>正常使用无急性危害</td><td>＞5000</td><td>＞5000</td></tr>
+        </tbody></table>
+      </div>
+      <h3 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:8px;">GHS 急性毒性类别</h3>
+      <div class="ref-table-wrap">
+        <table class="ref-table"><thead><tr><th>类别</th><th>经口 (mg/kg)</th><th>经皮 (mg/kg)</th><th>吸入-气体 (ppm, 4h)</th><th>吸入-蒸气 (mg/L, 4h)</th><th>吸入-粉尘/雾 (mg/L, 4h)</th></tr></thead>
+        <tbody>
+          <tr><td class="level-cell">类别 1</td><td>≤5</td><td>≤50</td><td>≤100</td><td>≤0.5</td><td>≤0.05</td></tr>
+          <tr><td class="level-cell">类别 2</td><td>＞5～≤50</td><td>＞50～≤200</td><td>＞100～≤500</td><td>＞0.5～≤2.0</td><td>＞0.05～≤0.5</td></tr>
+          <tr><td class="level-cell">类别 3</td><td>＞50～≤300</td><td>＞200～≤1000</td><td>＞500～≤2500</td><td>＞2.0～≤10.0</td><td>＞0.5～≤1.0</td></tr>
+          <tr><td class="level-cell">类别 4</td><td>＞300～≤2000</td><td>＞1000～≤2000</td><td>＞2500～≤5000</td><td>＞10.0～≤20.0</td><td>＞1.0～≤5.0</td></tr>
+          <tr><td class="level-cell">类别 5</td><td>＞2000～≤5000</td><td>＞2000～≤5000</td><td>＞5000</td><td>＞20.0</td><td>＞5.0</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderEcoRefTable() {
+  return `<div class="tool-panel active" id="panel-${App.currentTool}">
+    <div class="tool-card">
+      <div class="tool-card-title">生态毒性分级对照表</div>
+      <div class="tool-card-desc">中国农药登记生态毒性分级标准，涵盖 13 类非靶标生物。</div>
+      <div class="ref-table-wrap">
+        <table class="ref-table"><thead><tr>
+          <th>序号</th><th>生物类别</th><th>指标</th><th>单位</th>
+          <th><span class="tox-badge level-1" style="font-size:11px;">剧毒</span></th>
+          <th><span class="tox-badge level-2" style="font-size:11px;">高毒</span></th>
+          <th><span class="tox-badge level-3" style="font-size:11px;">中毒</span></th>
+          <th><span class="tox-badge level-4" style="font-size:11px;">低毒</span></th>
+        </tr></thead><tbody>
+          <tr><td>1</td><td>鱼类</td><td>LC50(96h)</td><td>mg a.i./L</td><td>≤0.1</td><td>0.1~1.0</td><td>1.0~10</td><td>&gt;10</td></tr>
+          <tr><td>2</td><td>溞类</td><td>EC50(48h)</td><td>mg a.i./L</td><td>≤0.1</td><td>0.1~1.0</td><td>1.0~10</td><td>&gt;10</td></tr>
+          <tr><td>3</td><td>藻类</td><td>EC50(72h)</td><td>mg a.i./L</td><td>—</td><td>≤0.3</td><td>0.3~3.0</td><td>&gt;3.0</td></tr>
+          <tr><td>4</td><td>鸟类(经口)</td><td>LD50</td><td>mg a.i./kg体重</td><td>≤10</td><td>10~50</td><td>50~500</td><td>&gt;500</td></tr>
+          <tr><td>5</td><td>鸟类(饲喂)</td><td>LC50</td><td>mg a.i./kg饲料</td><td>≤50</td><td>50~500</td><td>500~1000</td><td>&gt;1000</td></tr>
+          <tr><td>6</td><td>蜜蜂</td><td>LD50(48h)</td><td>μg a.i./蜂</td><td>≤0.001</td><td>0.001~2.0</td><td>2.0~11.0</td><td>&gt;11.0</td></tr>
+          <tr><td>7</td><td>家蚕</td><td>LC50(96h)</td><td>mg a.i./L</td><td>≤0.5</td><td>0.5~20</td><td>20~200</td><td>&gt;200</td></tr>
+          <tr><td>8</td><td>天敌赤眼蜂</td><td>安全系数</td><td>无</td><td>≤0.05</td><td>0.05~0.5</td><td>0.5~5</td><td>&gt;5</td></tr>
+          <tr><td>9</td><td>蚯蚓</td><td>LC50(14d)</td><td>mg a.i./kg干土</td><td>≤0.1</td><td>0.1~1.0</td><td>1.0~10</td><td>&gt;10</td></tr>
+          <tr><td>10</td><td>大型甲壳类</td><td>LC50(96h)</td><td>mg a.i./L</td><td>≤0.1</td><td>0.1~1.0</td><td>1.0~10</td><td>&gt;10</td></tr>
+          <tr><td>11</td><td>天敌两栖类</td><td>LC50(96h)</td><td>mg a.i./L</td><td>≤0.1</td><td>0.1~1.0</td><td>1.0~10</td><td>&gt;10</td></tr>
+          <tr><td>12</td><td>非靶标植物</td><td>EC50</td><td>mg a.i./L</td><td>≤0.1</td><td>0.1~1.0</td><td>1.0~10</td><td>&gt;10</td></tr>
+          <tr><td>13</td><td>家畜</td><td>LC50(28d)</td><td>mg a.i./kg饲料</td><td>≤10</td><td>10~100</td><td>100~1000</td><td>&gt;1000</td></tr>
+        </tbody></table>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:var(--info-bg);border-radius:6px;font-size:12px;color:var(--info);"><strong>说明：</strong>藻类无剧毒等级（3级）；其余生物均为 4 级分类。数值越小毒性越强，分级越严格。</div>
+    </div>
+  </div>`;
+}
+
+</script>
+<script>
+// risk.js — 风险评估：施药者健康风险、膳食风险、ADI推算、UF参考、单位暴露量查询
+
+// ====== 施药者健康风险评估辅助 ======
+
+function rqCropSearch(pid) {
+  const input = document.getElementById(`${pid}-cropSearch`);
+  const dropdown = document.getElementById(`${pid}-cropDropdown`);
+  const keyword = (input.value || '').trim().toLowerCase();
+  const allCrops = Object.keys(UE_DATA.cropTarget).sort();
+  const filtered = keyword === '' ? allCrops : allCrops.filter(c => c.toLowerCase().includes(keyword));
+  if (filtered.length === 0) { dropdown.style.display = 'none'; return; }
+  dropdown.innerHTML = filtered.slice(0, 50).map(c =>
+    `<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmousedown="rqSelectCrop('${pid}','${c}')">${c}</div>`
+  ).join('');
+  dropdown.style.display = 'block';
+}
+
+function rqSelectCrop(pid, crop) {
+  document.getElementById(`${pid}-cropSearch`).value = crop;
+  document.getElementById(`${pid}-crop`).value = crop;
+  document.getElementById(`${pid}-cropDropdown`).style.display = 'none';
+  rqCropChanged(pid);
+}
+
+function rqAoelSourceChanged(pid) {
+  const source = document.getElementById(`${pid}-aoelDermalSource`)?.value;
+  const section = document.getElementById(`${pid}-absorption-section`);
+  if (section) section.style.display = source === 'oral' ? '' : 'none';
+}
+
+function rqCropChanged(pid) {
+  const crop = document.getElementById(`${pid}-crop`).value;
+  const targetSel = document.getElementById(`${pid}-target`);
+  const dirSel = document.getElementById(`${pid}-spraydir`);
+  if (!crop || !UE_DATA.cropTarget[crop]) {
+    targetSel.innerHTML = '<option value="">-- 请先选择作物 --</option>';
+    dirSel.innerHTML = '<option value="">-- 全部方向 --</option><option value="低">低</option><option value="中">中</option><option value="高">高</option>';
+    return;
+  }
+  const targets = Object.keys(UE_DATA.cropTarget[crop]).sort();
+  targetSel.innerHTML = '<option value="">-- 全部靶标 --</option>' + targets.map(t => `<option value="${t}">${t}</option>`).join('');
+  const allDirs = new Set();
+  Object.values(UE_DATA.cropTarget[crop]).forEach(d => d.split('、').forEach(x => allDirs.add(x)));
+  dirSel.innerHTML = '<option value="">-- 全部方向 --</option>' + ['低','中','高'].filter(d => allDirs.has(d)).map(d => `<option value="${d}">${d}</option>`).join('');
+}
+
+function rqTargetChanged(pid) {
+  const crop = document.getElementById(`${pid}-crop`).value;
+  const target = document.getElementById(`${pid}-target`).value;
+  const dirSel = document.getElementById(`${pid}-spraydir`);
+  if (target && UE_DATA.cropTarget[crop]?.[target]) {
+    const directions = UE_DATA.cropTarget[crop][target].split('、');
+    dirSel.innerHTML = '<option value="">-- 全部方向 --</option>' + directions.map(d => `<option value="${d}">${d}</option>`).join('');
+    if (directions.length === 1) dirSel.value = directions[0];
+  } else if (crop && UE_DATA.cropTarget[crop]) {
+    const allDirs = new Set();
+    Object.values(UE_DATA.cropTarget[crop]).forEach(d => d.split('、').forEach(x => allDirs.add(x)));
+    dirSel.innerHTML = '<option value="">-- 全部方向 --</option>' + ['低','中','高'].filter(d => allDirs.has(d)).map(d => `<option value="${d}">${d}</option>`).join('');
+  }
+}
+
+// ====== 膳食风险评估辅助 ======
+
+let dietaryRowCount = 0;
+function dietaryAddRow(pid) {
+  const container = document.getElementById(`${pid}-food-rows`);
+  const idx = dietaryRowCount++;
+  const num = container.querySelectorAll('.dietary-food-row').length + 1;
+  const foodOpts = DIETARY_FOOD_CATEGORIES.map(c => `<option value="${c.name}">${c.name}（${(c.consumption * 1000).toFixed(1)} g/天）</option>`).join('');
+  const row = document.createElement('div');
+  row.className = 'dietary-food-row';
+  row.dataset.index = idx;
+  row.innerHTML = `
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+      <span style="font-size:12px;font-weight:600;color:var(--primary);">食物 ${num}</span>
+      <button onclick="this.closest('.dietary-food-row').remove()" style="background:none;border:1px solid var(--danger);color:var(--danger);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:auto;">删除</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">食物类别</label><select class="form-select" id="${pid}-foodcat-${idx}" onchange="dietaryFoodCategoryChanged('${pid}',${idx})">
+        <option value="">-- 请选择食物类别 --</option>${foodOpts}</select><span class="form-hint">选择后自动填入每日消费量</span></div>
+      <div class="form-group"><label class="form-label">残留数据类型</label><select class="form-select" id="${pid}-residueType-${idx}" onchange="dietaryResidueTypeChanged('${pid}',${idx})">
+        <option value="stmr">STMR（规范残留试验中值）</option><option value="mrl">MRL（最大残留限量）</option></select></div>
+      <div class="form-group"><label class="form-label">残留量 (mg/kg)</label><input class="form-input" type="number" id="${pid}-residue-${idx}" placeholder="如：0.5" step="any"></div>
+      <div class="form-group" id="${pid}-pfGroup-${idx}" style="display:none;"><label class="form-label">加工因子</label><input class="form-input" type="number" id="${pid}-pf-${idx}" placeholder="如：1.2" step="any"><span class="form-hint">无加工食品时留空或填 1</span></div>
+      <div class="form-group"><label class="form-label">食物消费量 F<sub>i</sub> (kg/天)</label><input class="form-input" type="number" id="${pid}-consumption-${idx}" placeholder="选择食物类别后自动填入" step="any"></div>
+    </div>`;
+  container.appendChild(row);
+}
+
+function dietaryFoodCategoryChanged(pid, idx) {
+  const catName = document.getElementById(`${pid}-foodcat-${idx}`).value;
+  const consumptionInput = document.getElementById(`${pid}-consumption-${idx}`);
+  if (!catName || !consumptionInput) return;
+  const cat = DIETARY_FOOD_CATEGORIES.find(c => c.name === catName);
+  if (cat) consumptionInput.value = cat.consumption;
+}
+
+function dietaryResidueTypeChanged(pid, idx) {
+  const type = document.getElementById(`${pid}-residueType-${idx}`).value;
+  const pfGroup = document.getElementById(`${pid}-pfGroup-${idx}`);
+  if (pfGroup) pfGroup.style.display = type === 'stmr' ? '' : 'none';
+}
+
+// ====== 膳食风险评估作物分类筛选 ======
+
+function cropClassifyFilter() {
+  const pid = 'risk-cropClassify';
+  const keyword = (document.getElementById(`${pid}-search`)?.value || '').trim().toLowerCase();
+  const checkboxes = document.querySelectorAll(`#panel-${pid} input[type="checkbox"]`);
+  const checkedCategories = new Set();
+  checkboxes.forEach(cb => { if (cb.checked) checkedCategories.add(cb.value); });
+
+  const tbody = document.querySelector(`#panel-${pid} tbody`);
+  if (!tbody) return;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const crop = (tr.dataset.crop || '').toLowerCase();
+    const category = tr.dataset.category || '';
+    const matchSearch = !keyword || crop.includes(keyword);
+    const matchCategory = checkedCategories.has(category);
+    tr.style.display = (matchSearch && matchCategory) ? '' : 'none';
+  });
+}
+
+// ====== 计算函数 ======
+
+function calcRiskRq(v) {
+  const formulation = v.formulation, crop = v.crop, sprayDir = v.spraydir;
+  const aiRate = parseFloat(v.aiRate), area = parseFloat(v.area), bw = parseFloat(v.bw);
+  const aoelDermal = parseFloat(v.aoelDermal2), aoelInhal = parseFloat(v.aoelInhal2);
+  const aoelDermalSource = v.aoelDermalSource || 'dermal';
+  if (!formulation) return errHtml('请选择剂型');
+  if (!sprayDir) return errHtml('请选择喷雾方向');
+  if (isNaN(aiRate) || aiRate <= 0) return errHtml('请输入有效的有效成分用药量');
+  if (isNaN(area) || area <= 0) return errHtml('请输入有效的施药面积');
+  if (isNaN(bw) || bw <= 0) return errHtml('请输入有效的体重');
+  if (isNaN(aoelDermal) || aoelDermal <= 0) return errHtml('请输入有效的经皮 AOEL');
+  if (isNaN(aoelInhal) || aoelInhal <= 0) return errHtml('请输入有效的吸入 AOEL');
+
+  const cat = UE_DATA.formulationToCategory[formulation];
+  if (!cat) return errHtml('未找到该剂型的分类数据');
+
+  const useAbsorption = aoelDermalSource === 'oral';
+  let absMix = 1.0, absApply = 1.0;
+  if (useAbsorption) {
+    const absMixVal = parseFloat(v.absMix), absApplyVal = parseFloat(v.absApply);
+    if (!isNaN(absMixVal) && absMixVal > 0) absMix = absMixVal / 100;
+    if (!isNaN(absApplyVal) && absApplyVal > 0) absApply = absApplyVal / 100;
+  }
+
+  const protLevels = [
+    { label: '较差防护', desc: '短衣、短裤、鞋' },
+    { label: '中等防护', desc: '长衣、长裤、鞋' },
+    { label: '较好防护', desc: '帽子、口罩、长衣、长裤、手套、鞋' },
+  ];
+
+  const rows = protLevels.map((pl, idx) => {
+    const mD = UE_DATA.mixDermal[cat][idx], mI = UE_DATA.mixInhal[cat][idx];
+    const aD = UE_DATA.applyDermal[sprayDir]?.[idx], aI = UE_DATA.applyInhal[sprayDir]?.[idx];
+    if (aD === undefined) return null;
+    const totalExpD = (mD * absMix + aD * absApply) * aiRate * area / bw;
+    const totalExpI = (mI + aI) * aiRate * area / bw;
+    const rqD = totalExpD / aoelDermal, rqI = totalExpI / aoelInhal, rqT = rqD + rqI;
+    return { label: pl.label, desc: pl.desc, mixExpD: mD * absMix, mixExpI: mI, applyExpD: aD * absApply, applyExpI: aI,
+      totalExpD, totalExpI, rqD, rqI, rqT, safe: rqT <= 1,
+      levelClass: rqT <= 0.5 ? 'success' : rqT <= 1 ? 'warning' : 'danger' };
+  }).filter(Boolean);
+
+  if (rows.length === 0) return errHtml('未找到暴露量数据');
+  const fmt = fmtNum;
+  const clr = c => c === 'success' ? 'success' : c === 'warning' ? 'warning' : 'danger';
+  const cls = val => val <= 1 ? (val <= 0.5 ? 'success' : 'warning') : 'danger';
+
+  let tableHtml = `<div style="overflow-x:auto;margin-top:4px;"><table class="ref-table" style="min-width:720px;font-size:12px;">
+    <thead><tr><th rowspan="2" style="min-width:100px;">指标</th><th colspan="2" style="text-align:center;">较差防护</th><th colspan="2" style="text-align:center;">中等防护</th><th colspan="2" style="text-align:center;">较好防护</th></tr>
+    <tr><th>经皮</th><th>吸入</th><th>经皮</th><th>吸入</th><th>经皮</th><th>吸入</th></tr></thead><tbody>`;
+
+  const rowLabels = ['配药暴露量','施药暴露量','总暴露量'];
+  const rowGetters = [
+    r => [r.mixExpD * aiRate * area / bw, r.mixExpI * aiRate * area / bw],
+    r => [r.applyExpD * aiRate * area / bw, r.applyExpI * aiRate * area / bw],
+    r => [r.totalExpD, r.totalExpI],
+  ];
+  rowLabels.forEach((lbl, li) => {
+    tableHtml += `<tr><td style="font-weight:600;">${lbl}</td>`;
+    rows.forEach(r => { const [d, i] = rowGetters[li](r); tableHtml += `<td>${fmt(d)}</td><td>${fmt(i)}</td>`; });
+    tableHtml += '</tr>';
+  });
+
+  tableHtml += `<tr><td style="font-weight:600;">风险熵 (RQ)</td>`;
+  rows.forEach(r => { tableHtml += `<td style="color:var(--${clr(cls(r.rqD))})">${fmt(r.rqD)}</td><td style="color:var(--${clr(cls(r.rqI))})">${fmt(r.rqI)}</td>`; });
+  tableHtml += `</tr><tr><td style="font-weight:600;">风险熵总计</td>`;
+  rows.forEach(r => { tableHtml += `<td colspan="2" style="text-align:center;font-weight:700;color:var(--${clr(r.levelClass)});font-size:14px;">${fmt(r.rqT)}</td>`; });
+  tableHtml += `</tr><tr><td style="font-weight:600;">风险判定</td>`;
+  rows.forEach(r => { const label = r.rqT <= 0.5 ? '可接受' : r.rqT <= 1 ? '接近限值' : '不可接受'; tableHtml += `<td colspan="2" style="text-align:center;"><span class="tox-badge ${r.levelClass}" style="font-size:11px;">${label}</span></td>`; });
+  tableHtml += '</tr></tbody></table></div>';
+
+  const steps = [
+    `<strong>单位暴露量查表（剂型${cat}，${sprayDir}喷雾）：</strong>`,
+    `下表同时列出较差/中等/较好三种防护水平下的经皮和吸入暴露量与风险系数`,
+    ``, `<strong>公式${useAbsorption ? '（透皮吸收率修正）' : ''}：</strong>`,
+    `经皮暴露量 = (配药经皮UE${useAbsorption ? ' × 配药透皮吸收率' : ''} + 施药经皮UE${useAbsorption ? ' × 施药透皮吸收率' : ''}) × ${aiRate} kg a.i./ha × ${area} ha ÷ ${bw} kg`,
+    `吸入暴露量 = (配药吸入UE + 施药吸入UE) × ${aiRate} kg a.i./ha × ${area} ha ÷ ${bw} kg`,
+    `RQ = 经皮暴露量 ÷ AOEL<sub>经皮</sub> + 吸入暴露量 ÷ AOEL<sub>吸入</sub>`,
+    ``, `<strong>AOEL 数据来源：</strong>`,
+    `经皮 AOEL = ${aoelDermal} mg/kg bw/day（${aoelDermalSource === 'oral' ? '经口毒性试验替代' : '经皮毒性试验直接推导'}${useAbsorption ? `，透皮吸收率 ${fmt(absMix * 100)}%/${fmt(absApply * 100)}%` : ''}）`,
+    `吸入 AOEL = ${aoelInhal} mg/kg bw/day（${(v.aoelInhalSource || 'inhal') === 'oral' ? '经口毒性试验替代' : '吸入毒性试验直接推导'}）`,
+    ``, `判定标准：综合 RQ ≤ 1 → 风险可接受；综合 RQ ＞ 1 → 风险不可接受`,
+  ];
+  return tableHtml + calcStepsHtml(steps);
+}
+
+function calcDietary(v) {
+  const bw = parseFloat(v.bw);
+  if (isNaN(bw) || bw <= 0) return errHtml('请输入有效的体重');
+  const adi = parseFloat(v.adi);
+  if (isNaN(adi) || adi <= 0) return errHtml('请输入有效的 ADI');
+
+  const rows = document.querySelectorAll('#panel-risk-dietary .dietary-food-row');
+  let nedi = 0;
+  const foodSteps = [];
+  let hasSTMR = false, hasMRL = false;
+
+  for (const row of rows) {
+    const idx = row.dataset.index;
+    const foodCat = document.getElementById(`risk-dietary-foodcat-${idx}`)?.value || '';
+    const foodName = foodCat || `食物${Number(idx) + 1}`;
+    const residueType = document.getElementById(`risk-dietary-residueType-${idx}`)?.value || 'stmr';
+    const residue = parseFloat(document.getElementById(`risk-dietary-residue-${idx}`)?.value);
+    const consumption = parseFloat(document.getElementById(`risk-dietary-consumption-${idx}`)?.value);
+
+    if (isNaN(residue) || isNaN(consumption) || residue < 0 || consumption < 0) continue;
+
+    if (residueType === 'mrl') hasMRL = true;
+    else hasSTMR = true;
+
+    // STMR-P = STMR × 加工因子（STMR 模式下可选）
+    let stmrP = residue;
+    let pfLabel = '';
+    if (residueType === 'stmr') {
+      const pf = parseFloat(document.getElementById(`risk-dietary-pf-${idx}`)?.value);
+      if (!isNaN(pf) && pf > 0 && pf !== 1) {
+        stmrP = residue * pf;
+        pfLabel = ` × 加工因子${pf}`;
+      }
+    }
+
+    const contrib = stmrP * consumption;
+    nedi += contrib;
+
+    const typeLabel = residueType === 'mrl' ? 'MRL' : 'STMR';
+    const consGrams = (consumption * 1000).toFixed(1);
+    foodSteps.push(
+      `${foodName}：${typeLabel} = ${residue} mg/kg${pfLabel}，F = ${consGrams} g/天(${consumption} kg/天) → ` +
+      `${fmtNum(stmrP)} × ${consumption} = <strong>${fmtNum(contrib)} mg</strong>`
+    );
+  }
+
+  if (foodSteps.length === 0) return errHtml('请至少填写一种食物的残留量和消费量');
+
+  const nediBw = nedi / bw;
+  const pctADI = (nediBw / adi) * 100;
+  const levelClass = pctADI <= 50 ? 'success' : pctADI <= 100 ? 'warning' : 'danger';
+  const levelName = pctADI <= 50 ? '风险可接受（安全裕度充足）' : pctADI <= 100 ? '风险可接受（接近限值）' : '风险不可接受';
+
+  let resultType, resultNote;
+  if (hasMRL && hasSTMR) {
+    resultType = 'NEDI/TMDI';
+    resultNote = '（STMR 与 MRL 混合评估）';
+  } else if (hasMRL) {
+    resultType = 'TMDI';
+    resultNote = '（基于 MRL 的理论最大每日摄入量）';
+  } else {
+    resultType = 'NEDI';
+    resultNote = '（基于 STMR 的国家估算每日摄入量）';
+  }
+
+  const steps = [
+    `<strong>NEDI 计算过程：</strong>`,
+    `NEDI = &Sigma;[ STMR<sub>i</sub>（或 STMR-P<sub>i</sub>）&times; F<sub>i</sub> ]`,
+    ``,
+    ...foodSteps,
+    ``,
+    `NEDI = <strong>${fmtNum(nedi)} mg</strong>${resultNote}`,
+    `NEDI<sub>bw</sub> = ${fmtNum(nedi)} mg ÷ ${bw} kg = <strong>${fmtNum(nediBw)} mg/kg bw/day</strong>`,
+    ``,
+    `%ADI = (NEDI<sub>bw</sub> ÷ ADI) × 100%`,
+    `%ADI = (${fmtNum(nediBw)} ÷ ${adi}) × 100% = <strong>${fmtNum(pctADI)}%</strong>`,
+    `判定标准：%ADI ≤ 100% → 风险可接受；%ADI ＞ 100% → 风险不可接受`,
+  ];
+
+  return `<div class="result-grid">
+    <div class="result-item success"><div class="result-item-label">${resultType}</div><div class="result-item-value success">${fmtNum(nedi)} mg/day</div></div>
+    <div class="result-item success"><div class="result-item-label">${resultType}<sub>bw</sub></div><div class="result-item-value success">${fmtNum(nediBw)} mg/kg bw/day</div></div>
+    <div class="result-item ${levelClass}"><div class="result-item-label">%ADI</div><div class="result-item-value ${levelClass}">${fmtNum(pctADI)}%</div></div>
+    <div class="result-item ${levelClass}"><div class="result-item-label">风险判定</div><div class="result-item-value ${levelClass}">${levelName}</div></div>
+  </div>${calcStepsHtml(steps)}`;
+}
+
+function calcAdi(v) {
+  const noael = parseFloat(v.noael), uf = parseFloat(v.uf);
+  if (isNaN(noael) || noael <= 0) return errHtml('请输入有效的 NOAEL 值');
+  if (isNaN(uf) || uf <= 0) return errHtml('请输入有效的不确定系数 (UF)');
+  const adi = noael / uf;
+  const steps = [`ADI = NOAEL ÷ UF`, `ADI = ${noael} ÷ ${uf} = <strong>${fmtNum(adi)} mg/kg bw/day</strong>`];
+  let ufBreakdown = '';
+  if (uf % 10 === 0 || uf % 100 === 0 || uf % 1000 === 0) {
+    const factors = []; let remaining = uf;
+    for (const [factor, desc] of [[10,'种间差异（动物→人）'],[10,'种内差异（人个体差异）'],[10,'数据充分性/研究期限']]) {
+      if (remaining >= factor && remaining % factor === 0) { factors.push(desc); remaining /= factor; }
+    }
+    if (factors.length > 0) ufBreakdown = `<div style="margin-top:8px;font-size:11px;color:var(--text-muted);">UF 组成推测：${factors.join(' × ')}${remaining > 1 ? ` × ${remaining}` : ''}</div>`;
+  }
+  return `<div class="result-grid"><div class="result-item success"><div class="result-item-label">ADI</div><div class="result-item-value success">${fmtNum(adi)} mg/kg bw/day</div></div></div>${calcStepsHtml(steps)}${ufBreakdown}`;
+}
+
+// ====== UF 参考表 ======
+
+function renderUFTable() {
+  return `<div class="tool-panel active" id="panel-${App.currentTool}">
+    <div class="tool-card">
+      <div class="tool-card-title">不确定系数参考表</div>
+      <div class="tool-card-desc">不确定系数（Uncertainty Factor, UF）用于从实验数据外推到安全暴露水平。各部分 UF 通常相乘得到总 UF。</div>
+      <div class="ref-table-wrap"><table class="ref-table"><thead><tr><th>来源</th><th>默认值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>种间差异 (动物 → 人)</td><td>10×</td><td>动物实验数据外推到人体的差异</td></tr>
+        <tr><td>种内差异 (人群差异)</td><td>10×</td><td>人群敏感性差异（老幼、病弱等）</td></tr>
+        <tr><td>亚慢性 → 慢性外推</td><td>10×</td><td>从亚慢性试验推导慢性 NOAEL</td></tr>
+        <tr><td>LOAEL → NOAEL</td><td>10×</td><td>从 LOAEL 推导 NOAEL</td></tr>
+        <tr><td>数据不完整</td><td>2~10×</td><td>数据库不充分时额外安全系数</td></tr>
+        <tr><td>特殊考虑 (如发育毒性)</td><td>额外 3~10×</td><td>考虑特殊毒性终点</td></tr>
+      </tbody></table></div>
+      <div style="margin-top:16px;padding:12px;background:var(--info-bg);border-radius:6px;font-size:12px;color:var(--info);"><strong>常用组合：</strong>种间 10× + 种内 10× = 默认 UF 100。如使用 LOAEL 则通常 UF = 1000。实际 UF 需根据数据质量和评价目的综合确定。</div>
+    </div>
+  </div>`;
+}
+
+// ====== 单位暴露量查询 ======
+
+function ueCropSearch() {
+  const pid = 'risk-ue';
+  const input = document.getElementById(`${pid}-cropSearch`);
+  const dropdown = document.getElementById(`${pid}-cropDropdown`);
+  const keyword = (input.value || '').trim().toLowerCase();
+  const allCrops = Object.keys(UE_DATA.cropTarget).sort();
+  const filtered = keyword === '' ? allCrops : allCrops.filter(c => c.toLowerCase().includes(keyword));
+  if (filtered.length === 0) { dropdown.style.display = 'none'; return; }
+  dropdown.innerHTML = filtered.slice(0, 50).map(c =>
+    `<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmousedown="ueSelectCrop('${c}')">${c}</div>`
+  ).join('');
+  dropdown.style.display = 'block';
+}
+
+function ueSelectCrop(crop) {
+  const pid = 'risk-ue';
+  document.getElementById(`${pid}-cropSearch`).value = crop;
+  document.getElementById(`${pid}-crop`).value = crop;
+  document.getElementById(`${pid}-cropDropdown`).style.display = 'none';
+  ueCropChanged();
+}
+
+function ueCropChanged() {
+  const pid = 'risk-ue';
+  const crop = document.getElementById(`${pid}-crop`).value;
+  const targetSel = document.getElementById(`${pid}-target`);
+  const dirSel = document.getElementById(`${pid}-spraydir`);
+  targetSel.innerHTML = '<option value="">-- 全部靶标 --</option>';
+  dirSel.innerHTML = '<option value="">-- 全部方向 --</option><option value="低">低</option><option value="中">中</option><option value="高">高</option>';
+  if (!crop || !UE_DATA.cropTarget[crop]) { ueAutoQuery(); return; }
+  const targets = Object.keys(UE_DATA.cropTarget[crop]).sort();
+  targetSel.innerHTML = '<option value="">-- 全部靶标 --</option>' + targets.map(t => `<option value="${t}">${t}</option>`).join('');
+  const allDirs = new Set();
+  Object.values(UE_DATA.cropTarget[crop]).forEach(d => d.split('、').forEach(x => allDirs.add(x)));
+  dirSel.innerHTML = '<option value="">-- 全部方向 --</option>' + ['低','中','高'].filter(d => allDirs.has(d)).map(d => `<option value="${d}">${d}</option>`).join('');
+  ueAutoQuery();
+}
+
+function ueTargetChanged() {
+  const pid = 'risk-ue';
+  const crop = document.getElementById(`${pid}-crop`).value;
+  const target = document.getElementById(`${pid}-target`).value;
+  const dirSel = document.getElementById(`${pid}-spraydir`);
+  if (target && UE_DATA.cropTarget[crop]?.[target]) {
+    const directions = UE_DATA.cropTarget[crop][target].split('、');
+    dirSel.innerHTML = '<option value="">-- 全部方向 --</option>' + directions.map(d => `<option value="${d}">${d}</option>`).join('');
+    if (directions.length === 1) dirSel.value = directions[0];
+  } else if (crop && UE_DATA.cropTarget[crop]) {
+    const allDirs = new Set();
+    Object.values(UE_DATA.cropTarget[crop]).forEach(d => d.split('、').forEach(x => allDirs.add(x)));
+    dirSel.innerHTML = '<option value="">-- 全部方向 --</option>' + ['低','中','高'].filter(d => allDirs.has(d)).map(d => `<option value="${d}">${d}</option>`).join('');
+  }
+  ueAutoQuery();
+}
+
+function ueAutoQuery() {
+  const pid = 'risk-ue';
+  const formulation = document.getElementById(`${pid}-formulation`).value;
+  const crop = document.getElementById(`${pid}-crop`).value;
+  const target = document.getElementById(`${pid}-target`).value;
+  const sprayDir = document.getElementById(`${pid}-spraydir`).value;
+  const resultArea = document.getElementById(`result-${pid}`);
+  const resultContent = document.getElementById(`result-content-${pid}`);
+
+  if (!formulation) { resultContent.innerHTML = ''; resultArea.classList.remove('visible'); return; }
+  const cat = UE_DATA.formulationToCategory[formulation];
+
+  let directions;
+  if (sprayDir) { directions = [sprayDir]; }
+  else if (target && crop && UE_DATA.cropTarget[crop]?.[target]) { directions = UE_DATA.cropTarget[crop][target].split('、'); }
+  else if (crop && UE_DATA.cropTarget[crop]) {
+    const allDirs = new Set();
+    Object.values(UE_DATA.cropTarget[crop]).forEach(d => d.split('、').forEach(x => allDirs.add(x)));
+    directions = ['低','中','高'].filter(d => allDirs.has(d));
+  } else { directions = ['低','中','高']; }
+
+  if (!directions || directions.length === 0) { resultContent.innerHTML = errHtml('未找到喷雾方向数据'); resultArea.classList.add('visible'); return; }
+  const dirLabels = { '低':'（高度 < 80cm）', '中':'（高度 80~130cm）', '高':'（高度 > 130cm）' };
+
+  let html = `<div style="margin-bottom:12px;padding:12px;background:var(--primary-lighter);border-radius:6px;font-size:12px;color:var(--primary-dark);line-height:1.6;"><strong>查询条件：</strong>${formulation}（剂型${cat}） / ${crop || '（未选作物）'}${target ? ' / ' + target : crop ? '（全部靶标）' : ''} / 喷雾方向：${sprayDir || directions.join('、')}</div>`;
+
+  // 合并表格：配药暴露量 + 施药暴露量
+  const totalRows = 2 + directions.length * 2;
+  html += `<div class="ref-table-wrap"><table class="ref-table" style="text-align:center;">
+    <thead><tr>
+      <th rowspan="2" style="min-width:160px;text-align:center;">暴露场景</th>
+      <th rowspan="2" style="min-width:80px;text-align:center;">暴露途径</th>
+      <th colspan="3" style="text-align:center;">单位暴露量 (mg/kg a.i. handled)</th>
+    </tr><tr>
+      <th style="text-align:center;">较差防护</th>
+      <th style="text-align:center;">中等防护</th>
+      <th style="text-align:center;">较好防护</th>
+    </tr></thead><tbody>`;
+
+  // 配药暴露量行
+  html += `<tr><td rowspan="2" style="vertical-align:middle;text-align:center;">配药剂型${cat}（${formulation}）</td><td style="text-align:center;">经皮</td>
+    <td>${UE_DATA.mixDermal[cat][0]}</td><td>${UE_DATA.mixDermal[cat][1]}</td><td>${UE_DATA.mixDermal[cat][2]}</td></tr>
+    <tr><td style="text-align:center;">吸入</td>
+    <td>${UE_DATA.mixInhal[cat][0]}</td><td>${UE_DATA.mixInhal[cat][1]}</td><td>${UE_DATA.mixInhal[cat][2]}</td></tr>`;
+
+  // 施药暴露量行（每个喷雾方向一组）
+  directions.forEach(d => {
+    html += `<tr><td rowspan="2" style="vertical-align:middle;text-align:center;">施药喷雾方向：${d}${dirLabels[d] || ''}</td><td style="text-align:center;">经皮</td>
+      <td>${UE_DATA.applyDermal[d][0]}</td><td>${UE_DATA.applyDermal[d][1]}</td><td>${UE_DATA.applyDermal[d][2]}</td></tr>
+      <tr><td style="text-align:center;">吸入</td>
+      <td>${UE_DATA.applyInhal[d][0]}</td><td>${UE_DATA.applyInhal[d][1]}</td><td>${UE_DATA.applyInhal[d][2]}</td></tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+
+  if (directions.length > 1) {
+    html += `<div style="margin-top:12px;padding:10px 14px;background:var(--warning-bg);border-radius:6px;font-size:12px;color:var(--warning);">提示：该组合对应多个喷雾方向（${directions.join('、')}），初级风险评估建议取保守值（${directions[directions.length-1]}）。</div>`;
+  }
+  html += `<div style="margin-top:16px;padding:12px;background:#fafafa;border-radius:6px;font-size:11px;color:var(--text-muted);line-height:1.8;"><strong>说明：</strong>较差防护 = 短衣、短裤、鞋；中等防护 = 长衣、长裤、鞋；较好防护 = 帽子、口罩、长衣、长裤、手套、鞋。单位暴露量单位为 mg/kg a.i. handled，Area 默认值为 1 公顷。数据来源：NY/T 3153-2017。</div>`;
+
+  resultContent.innerHTML = html;
+  resultArea.classList.add('visible');
+}
+
+</script>
+<script>
+// registry.js — 农药查询：全球登记查询、评估报告查询、通用名查询
+
+function switchRegTab(regionId, btn) {
+  document.querySelectorAll('.reg-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.reg-region').forEach(r => r.classList.remove('active'));
+  document.getElementById(`reg-region-${regionId}`).classList.add('active');
+  const searchInput = document.getElementById('reg-search-input');
+  if (searchInput) searchInput.value = '';
+  document.querySelectorAll('.reg-table tr').forEach(tr => tr.classList.remove('hidden-row'));
+}
+
+function filterRegTable() {
+  const keyword = (document.getElementById('reg-search-input').value || '').trim().toLowerCase();
+  const activeRegion = document.querySelector('.reg-region.active');
+  if (!activeRegion) return;
+  activeRegion.querySelectorAll('.reg-table tbody tr').forEach(tr => {
+    tr.classList.toggle('hidden-row', keyword !== '' && !tr.textContent.toLowerCase().includes(keyword));
+  });
+}
+
+function filterAssessCards() {
+  const keyword = (document.getElementById('assess-search-input').value || '').trim().toLowerCase();
+  document.querySelectorAll('.assess-country').forEach(card => {
+    card.classList.toggle('hidden-card', keyword !== '' && !card.textContent.toLowerCase().includes(keyword));
+  });
+}
+
+</script>
+<script>
+// registry-ui.js — 登记查询面板 HTML 生成
+
+const RegistryUI = {
+  renderGlobal() {
+    const regions = [
+      { id: 'asia', name: '亚太', icon: '🌏' },
+      { id: 'europe', name: '欧洲', icon: '🌍' },
+      { id: 'americas', name: '美洲', icon: '🌎' },
+      { id: 'africa', name: '非洲', icon: '🌍' },
+    ];
+    const data = {
+      asia: [
+        { country:'中国', authority:'农业农村部农药检定所(ICAMA)', url:'http://www.chinapesticide.org.cn/zwb/dataCenter', category:'植物保护产品、生物杀灭剂(不含消毒剂)' },
+        { country:'中国台湾', authority:'中国台湾农业委员会(COA)', url:'https://otserv2.acri.gov.tw/ppmmark/', category:'植物保护产品、生物杀灭剂(不含消毒剂)' },
+        { country:'日本', authority:'日本农林水产省（MAFF）', url:'https://pesticide.maff.go.jp/', category:'植物保护产品' },
+        { country:'韩国', authority:'韩国农村振兴厅（RDA）', url:'https://psis.rda.go.kr/psis/agc/res/agchmRegistStusLst.ps', category:'植物保护产品' },
+        { country:'韩国', authority:'韩国环境部（MOE）', url:'https://chemp.me.go.kr/', category:'生物杀灭剂(含消毒剂)' },
+        { country:'印度尼西亚', authority:'印度尼西亚农业部', url:'https://www.pertanian.go.id/', category:'植物保护产品' },
+        { country:'越南', authority:'越南农业与农村部植物保护局(PPD)', url:'https://luatvietnam.vn/tim-van-ban.html', category:'植物保护产品' },
+        { country:'泰国', authority:'泰国农业与合作社部', url:'https://www.doa.go.th/th/', category:'植物保护产品' },
+        { country:'哈萨克斯坦', authority:'哈萨克斯坦农工业部（MAAI）', url:'https://www.gov.kz/memleket/entities/agroindust/documents/1?lang=en', category:'植物保护产品' },
+        { country:'马来西亚', authority:'马来西亚农业部 (DOA)', url:'http://www.portal.doa.gov.my/racunberdaftar/', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'斯里兰卡', authority:'土地与农业发展局（DAD）', url:'https://agrariandept.gov.lk/', category:'植物保护产品' },
+        { country:'新加坡', authority:'新加坡食品局（SFA）', url:'https://www.sfa.gov.sg/tools-and-resources/pesticides-search', category:'植物保护产品' },
+        { country:'新加坡', authority:'新加坡国家环境局（NEA）', url:'https://www.nea.gov.sg/our-services/pest-control/registration-of-control-of-public-health-pesticides-and-repellents-against-vectors', category:'生物杀灭剂(不含消毒剂)' },
+        { country:'澳大利亚', authority:'澳大利亚农药和兽药管理局（APVMA）', url:'https://portal.apvma.gov.au/pubcris', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'新西兰', authority:'新西兰农业化合物与兽药管理局(ACVM）', url:'https://eatsafe.nzfsa.govt.nz/web/public/acvm-register', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'印度', authority:'植物保护、检疫和储存局（PPQS）', url:'http://ppqs.gov.in', category:'植物保护产品' },
+        { country:'巴基斯坦', authority:'巴基斯坦食品安全研究部植物保护司（DPP）', url:'http://plantprotection.gov.pk/', category:'植物保护产品' },
+        { country:'约旦', authority:'约旦农业部（MOA）', url:'https://dms.moa.gov.jo/Pesticides_Inquiry/', category:'植物保护产品' },
+        { country:'菲律宾', authority:'农业部化肥与农药管理局（FPA)', url:'https://fpa.da.gov.ph/resources/reports/registered-products/', category:'植物保护产品' },
+        { country:'老挝', authority:'老挝贸易门户网站（LTP）', url:'http://www.laotradeportal.gov.la/', category:'植物保护产品' },
+        { country:'黎巴嫩', authority:'黎巴嫩农业部（MOA）', url:'http://pesticides.agriculture.gov.lb/Search/', category:'植物保护产品' },
+      ],
+      europe: [
+        { country:'欧盟', authority:'欧盟委员会(EC)、欧洲食品安全管理局(EFSA)', url:'https://ec.europa.eu/food/plant/pesticides/eu-pesticides-database/start/screen/active-substances', category:'植物保护产品' },
+        { country:'欧盟', authority:'欧洲化学品管理局（ECHA）', url:'https://echa.europa.eu/information-on-chemicals/biocidal-products/', category:'生物杀灭剂(含消毒剂)' },
+        { country:'英国', authority:'英国健康与安全执行局（HSE）', url:'https://secure.pesticides.gov.uk/pestreg/', category:'植物保护产品' },
+        { country:'英国', authority:'英国健康与安全执行局（HSE）', url:'https://www.hse.gov.uk/biocides/products/uk-authorised-biocidal-products.htm', category:'生物杀灭剂(含消毒剂)' },
+        { country:'德国', authority:'德国联邦消费者保护与食品安全局(BVL)', url:'https://psm-zulassung.bvl.bund.de/psm/jsp/', category:'植物保护产品' },
+        { country:'德国', authority:'德国联邦职业安全与健康研究所(BAuA)', url:'https://www.ebiomeld.de/DE/Offen/offen_node', category:'生物杀灭剂(含消毒剂)' },
+        { country:'法国', authority:'国家卫生安全署(ANSES)', url:'https://www.anses.fr/fr/decisions', category:'植物保护产品' },
+        { country:'法国', authority:'国家卫生安全署(ANSES)', url:'https://www.anses.fr/fr/decisions_biocide', category:'生物杀灭剂(含消毒剂)' },
+        { country:'意大利', authority:'意大利农业食品林业政策部（MiPAAF/MIPAAF）', url:'https://www.sian.it/mimfFitoPub/ricercaInizialeFito.get', category:'植物保护产品' },
+        { country:'西班牙', authority:'西班牙农业、渔业和食品部（MAPA）', url:'https://servicio.mapa.gob.es/regfiweb#', category:'植物保护产品' },
+        { country:'西班牙', authority:'西班牙国家医疗与健康产品局（AEMPS)', url:'https://www.aemps.gob.es/comunicacion/biocidas-y-cuidado-personal/biocidas-aemps/', category:'生物杀灭剂' },
+        { country:'俄罗斯', authority:'俄罗斯联邦农业部', url:'https://www.agroxxi.ru/goshandbook', category:'植物保护产品' },
+        { country:'爱尔兰', authority:'爱尔兰农业、食品和海洋部（DAFM）', url:'https://www.pcs.agriculture.gov.ie/products/', category:'植物保护产品' },
+        { country:'爱尔兰', authority:'爱尔兰农业、食品和海洋部（DAFM）', url:'https://publicapps.agriculture.gov.ie/prs/home#aboutModal', category:'生物杀灭剂(含消毒剂)' },
+        { country:'爱沙尼亚', authority:'爱沙尼亚农业局（PBA）', url:'https://portaal.agri.ee/avalik/#/taimekaitse/taimekaitsevahendid-otsing/en', category:'植物保护产品' },
+        { country:'爱沙尼亚', authority:'爱沙尼亚卫生局（Terviseamet）', url:'https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fwww.terviseamet.ee%2Fsites%2Fdefault%2Ffiles%2Fdocuments%2F2025-08%2FRegistreeritud%2520biotsiidid_01.08.2025_0.xls', category:'生物杀灭剂(含消毒剂)' },
+        { country:'奥地利', authority:'奥地利健康和食品安全局（AGES）', url:'https://psmregister.baes.gv.at/psmregister', category:'植物保护产品' },
+        { country:'奥地利', authority:'奥地利联邦环境局（UBA）', url:'https://www.biozide.at/en/bp-en/bp-register', category:'生物杀灭剂(含消毒剂)' },
+        { country:'白俄罗斯', authority:'国家种子生产与检疫植物保护检查机构（GGISKZR）', url:'https://ggiskzr.by/reestr/', category:'植物保护产品' },
+        { country:'比利时', authority:'联邦公共健康、食品安全与环境局（FPS Health）', url:'https://fytoweb.be/en/plant-protection-products/consult-authorisations-plant-protection-products', category:'植物保护产品' },
+        { country:'比利时', authority:'联邦公共健康、食品安全与环境局（FPS Health）', url:'https://apps.health.belgium.be/gestautor-public-search/', category:'生物杀灭剂(含消毒剂)' },
+        { country:'冰岛', authority:'冰岛环境与自然资源部（UST）', url:'https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fust.is%2Flibrary%2Fsida%2FMarkadsleyfi_i_gildi.xlsx&wdOrigin=BROWSELINK', category:'生物杀灭剂(含消毒剂)' },
+        { country:'波兰', authority:'波兰农业和农村发展部（MRiRW）', url:'https://www.gov.pl/web/rolnictwo/rejestr-rodkow-ochrony-roslin', category:'植物保护产品' },
+        { country:'波兰', authority:'波兰注册产品管理局（URPL）', url:'https://www.gov.pl/web/urpl/wykaz-produktow-biobojczych2', category:'生物杀灭剂(含消毒剂)' },
+        { country:'丹麦', authority:'丹麦环境保护局（EPA-DK/MST）', url:'https://mst.dk/erhverv/sikker-kemi/database-for-bekaempelsesmidler/bmd', category:'植物保护产品' },
+        { country:'芬兰', authority:'芬兰化学品和安全局（Tukes/Kemidigi）', url:'https://www.kemidigi.fi/aloitussivu', category:'植物保护产品' },
+        { country:'芬兰', authority:'芬兰化学品和安全局（Tukes/Kemidigi）', url:'https://www.kemidigi.fi/biosidirekisteri/haku', category:'生物杀灭剂(含消毒剂)' },
+        { country:'荷兰', authority:'荷兰植物保护产品和生物杀灭剂授权委员会（CTGB）', url:'https://pesticidesdatabase.ctgb.nl/nl/authorisations', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'捷克', authority:'捷克国家卫生研究所（KSRZIS）', url:'https://eregpublicsecure.ksrzis.cz/Registr/CHLAP/Biocid', category:'生物杀灭剂(含消毒剂)' },
+        { country:'克罗地亚', authority:'克罗地亚农业部农业检查局', url:'https://fis.mps.hr/fis/javna-trazilica-szb/', category:'植物保护产品' },
+        { country:'拉脱维亚', authority:'拉脱维亚国家植物保护服务局（VAAD）', url:'https://registri.vaad.gov.lv/', category:'植物保护产品' },
+        { country:'立陶宛', authority:'立陶宛国家植物检疫服务局（VMVT）', url:'http://www.vatzum.lt/lt/veikla/veiklos-sritys/augalu-apsaugos-produktu-registravimas/#raap', category:'植物保护产品' },
+        { country:'立陶宛', authority:'立陶宛国家公共卫生中心（NVSC）', url:'https://biocidai.nvsc.lt/', category:'生物杀灭剂(含消毒剂)' },
+        { country:'卢森堡', authority:'卢森堡农业、葡萄栽培和农村发展局（ASTA）', url:'https://saturn.etat.lu/tapes/', category:'植物保护产品' },
+        { country:'罗马尼亚', authority:'罗马尼亚农业和农村发展部（MADR）', url:'https://www.madr.ro/omologare-produse-de-protectie-a-plantelor/lista-produselor-de-protectie-a-plantelor-omologate.html', category:'植物保护产品' },
+        { country:'罗马尼亚', authority:'罗马尼亚卫生部（MS）', url:'https://ms.ro/ro/minister/organizare/structura-organizatorica/directia-generala-de-asistenta-medicala-si-sanatate-publica/registrul-na%C8%9Bional-al-produselor-biocide/', category:'生物杀灭剂(含消毒剂)' },
+        { country:'马耳他', authority:'马耳他竞争和消费者事务局（MCCAA）', url:'https://mccaa.org.mt/Section/Content?contentId=1158', category:'植物保护产品' },
+        { country:'摩尔多瓦', authority:'摩尔多瓦国家公共健康局（ANSP）', url:'https://ansp.md/produsele-biocide/', category:'生物杀灭剂(含消毒剂)' },
+        { country:'挪威', authority:'挪威食品安全局（Mattilsynet)', url:'https://plantevernmidler.mattilsynet.no/godkjente_kjemiske_mikrobiologiske_preparater', category:'植物保护产品' },
+        { country:'挪威', authority:'挪威环境局（Miljødirektoratet）', url:'https://www.miljodirektoratet.no/ansvarsomrader/kjemikalier/biocider/godkjente-biocidprodukter/', category:'生物杀灭剂(含消毒剂)' },
+        { country:'葡萄牙', authority:'葡萄牙食品和兽医总局（DGAV）植物保护产品授权管理系统', url:'https://sifito.dgav.pt/account/register', category:'植物保护产品' },
+        { country:'葡萄牙', authority:'国家卫生局(DGS)', url:'https://www.dgs.pt/saude-ambiental/areas-de-intervencao/riscos-quimicos-e-biologicos/riscos-quimicos-e-biologicos--biocidas-e-pesticidas.aspx', category:'生物杀灭剂' },
+        { country:'瑞典', authority:'瑞典化学品局（KEMI）', url:'https://apps.kemi.se/BkmRegistret/Kemi.Spider.Web.External/Produkt', category:'植物保护产品' },
+        { country:'瑞士', authority:'瑞士联邦食品安全和兽医办公室（FSVO/BLV）', url:'https://www.psm.admin.ch/fr/produkte', category:'植物保护产品' },
+        { country:'塞尔维亚', authority:'塞尔维亚农业、林业和水管理部（MAFWM）', url:'https://uzb.minpolj.gov.rs/organizaciona-struktura/odsek-za-sredstva-za-zastitu-ishranu-bilja/liste/', category:'植物保护产品' },
+        { country:'塞浦路斯', authority:'塞浦路斯农业、农村发展与环境部（MOA）', url:'https://www.moa.gov.cy/moa/da/da.nsf/permission_protected_table_en/permission_protected_table_en?openform', category:'植物保护产品' },
+        { country:'斯洛伐克', authority:'斯洛伐克中央植物检疫和检验局（UKSUP）', url:'https://pripravky.uksup.sk/pripravok/search', category:'植物保护产品' },
+        { country:'斯洛伐克', authority:'斯洛伐克化学品检验中心（CCSP）', url:'https://www.ccsp.sk/databio/newindex.htm', category:'生物杀灭剂(含消毒剂)' },
+        { country:'斯洛文尼亚', authority:'斯洛文尼亚政府数据门户', url:'https://podatki.gov.si/dataset/register-biocidnih-proizvodov-na-trgu-rs', category:'生物杀灭剂(含消毒剂)' },
+        { country:'土耳其', authority:'土耳其农业与林业部（MOAF）', url:'https://bku.tarimorman.gov.tr/BKURuhsat/Index?csrt=162398323827760748', category:'植物保护产品' },
+        { country:'乌克兰', authority:'乌克兰生态与自然资源部', url:'https://agroscience.com.ua/views/perelik-pest-all', category:'植物保护产品' },
+        { country:'希腊', authority:'希腊农村发展和食品部（MRDFA）', url:'https://www.minagric.gr/en/farmer-menu-2/plant-protection', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'匈牙利', authority:'全国食品链安全局（NÉBIH）', url:'https://portal.nebih.gov.hu/web/guest/-/novenyvedoszer-engedelyek-jegyzeke-list-of-authorizations-of-plant-protection-products-', category:'植物保护产品' },
+        { country:'匈牙利', authority:'国家公共卫生和兽医办公室（NNGYK/NÉBIH）', url:'https://ika.nngyk.gov.hu/', category:'生物杀灭剂(含消毒剂)' },
+      ],
+      americas: [
+        { country:'美国', authority:'美国环境保护署（EPA）', url:'https://ordspub.epa.gov/ords/pesticides/f?p=APPRIL_PUBLIC:2::::::', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'美国', authority:'美国国家农药信息系统（NPIRS）', url:'https://www.npirs.org/public', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'加拿大', authority:'加拿大农药监管局（PRD）', url:'https://pest-control.canada.ca/pesticide-registry/en/product-search.html', category:'植物保护产品、生物杀灭剂(含消毒剂)' },
+        { country:'巴西', authority:'农业部 (MAPA)、卫生监督局 (ANVISA) 、环境局 (IBAMA)', url:'https://www.gov.br/agricultura/pt-br/assuntos/insumos-agropecuarios/insumos-agricolas/agrotoxicos/agrofit', category:'植物保护产品' },
+        { country:'阿根廷', authority:'阿根廷国家农业食品健康与质量服务局（SENASA）', url:'https://aps2.senasa.gov.ar/vademecum/app/publico', category:'植物保护产品' },
+        { country:'墨西哥', authority:'墨西哥联邦卫生风险保护委员会（COFEPRIS）', url:'https://siipris03.cofepris.gob.mx/resoluciones/consultas/conwebregplaguicida.asp', category:'植物保护产品、生物杀灭剂' },
+        { country:'智利', authority:'智利农业和畜牧业服务局（SAG）', url:'https://www.sag.gob.cl/ambitos-de-accion/insumos-y-productos-silvoagricolas/registros', category:'植物保护产品' },
+        { country:'巴拿马', authority:'巴拿马农业发展部（MIDA）', url:'https://mida.gob.pa/direcciones/direccion-nacional-de-sanidad-vegetal/agroquimicos/?csrt=1397885985680164366', category:'植物保护产品' },
+        { country:'玻利维亚', authority:'玻利维亚农牧业健康与食品安全局（SENASAG）', url:'https://cepbweb.senasag.gob.bo/egp/#/productosQuimicosUsoAgricola', category:'植物保护产品' },
+        { country:'伯利兹', authority:'伯利兹害虫控制委员会（PCB）', url:'https://login.pcbbelize.com/registrations/manual', category:'植物保护产品' },
+        { country:'厄瓜多尔', authority:'厄瓜多尔农业质量局（AGROCALIDAD）', url:'https://agrodrive.agrocalidad.gob.ec/index.php/s/qi8J7MBwS8JCN6H', category:'植物保护产品' },
+        { country:'古巴', authority:'古巴农业部（MINAG）', url:'https://www.minag.gob.cu/wp-content/uploads/2023/06/Lista-Oficial-de-Plaguicidas.pdf', category:'植物保护产品' },
+        { country:'特立尼达和多巴哥', authority:'卫生部化学、食品和药品部（CFDD）', url:'https://health.gov.tt/services/chemistry-food-and-drugs-division', category:'植物保护产品、生物杀灭剂' },
+        { country:'乌拉圭', authority:'乌拉圭农牧业渔业部（MGAP）', url:'https://www.mgap.gub.uy/profit/productosweb.aspx', category:'植物保护产品' },
+        { country:'牙买加', authority:'加勒比地区农药管理网络（CariPesticides）', url:'https://www.caribpesticides.net/cp_reg_pes0.asp?navNo=1', category:'植物保护产品' },
+      ],
+      africa: [
+        { country:'埃及', authority:'农业用农药委员会(APC)', url:'http://www.apc.gov.eg/en/default.aspx', category:'植物保护产品' },
+        { country:'摩洛哥', authority:'国家食品卫生安全产品办公室', url:'http://www.onssa.gov.ma/fr/', category:'植物保护产品、生物杀灭剂' },
+        { country:'埃塞俄比亚', authority:'农业部(MOA)', url:'http://www.eap.gov.et/Health-and-quality-regulatory/Plant/Pesticide.asp', category:'植物保护产品' },
+        { country:'肯尼亚', authority:'有害生物控制产品管理局(PCDB)', url:'https://pcpb.or.ke/products.html', category:'植物保护产品、生物杀灭剂(不含消毒剂)' },
+        { country:'尼日利亚', authority:'国家食品药品监督管理局(NAFDAC)', url:'https://www.nafdac.gov.ng/', category:'植物保护产品、生物杀灭剂' },
+        { country:'赞比亚', authority:'农业部(MOA)', url:'https://www.agriculture.gov.zm/', category:'植物保护产品' },
+        { country:'津巴布韦', authority:'农业部(MOA)', url:'http://www.moa.gov.zw/', category:'植物保护产品' },
+        { country:'南非', authority:'农林渔业部(DAFF)', url:'http://www.daff.gov.za/', category:'植物保护产品、生物杀灭剂(不含消毒剂)' },
+        { country:'阿尔及利亚', authority:'农业及农村发展部(MADF)', url:'http://fr.madr.gov.dz/', category:'植物保护产品、生物杀灭剂(不含消毒剂)' },
+        { country:'加纳', authority:'加纳环境保护局(EPA)', url:'http://www.epa.gov.gh/', category:'植物保护产品、生物杀灭剂' },
+      ],
+    };
+
+    function truncUrl(url) { return url.length > 60 ? url.substring(0, 57) + '...' : url; }
+
+    return `<div class="tool-panel active" id="panel-registry-global"><div class="tool-card">
+      <div class="tool-card-title">全球农药登记查询</div>
+      <div class="tool-card-desc">汇总全球各国农药（植物保护产品、生物杀灭剂）登记查询官方网站，按亚太、欧洲、美洲和非洲四个区域分类展示。</div>
+      <div class="reg-tabs">${regions.map((r, i) => `<button class="reg-tab${i === 0 ? ' active' : ''}" onclick="switchRegTab('${r.id}', this)">${r.icon} ${r.name}</button>`).join('')}</div>
+      <div class="reg-search"><input class="form-input" type="text" id="reg-search-input" placeholder="搜索国家、主管部门或产品类别..." oninput="filterRegTable()"></div>
+      ${regions.map((r, i) => `<div class="reg-region${i === 0 ? ' active' : ''}" id="reg-region-${r.id}">
+        <table class="reg-table"><thead><tr><th>国家/地区</th><th>主管部门</th><th>查询网站</th><th>产品类别</th></tr></thead>
+        <tbody>${data[r.id].map(row => `<tr><td class="reg-country">${row.country}</td><td>${row.authority}</td>
+          <td><a href="${row.url}" target="_blank" rel="noopener noreferrer" class="reg-link">${truncUrl(row.url)}</a></td><td>${row.category}</td></tr>`).join('')}</tbody></table></div>`).join('')}
+    </div></div>`;
+  },
+
+  renderAssessment() {
+    const countries = [
+      { name:'美国 EPA', flag:'🇺🇸', agency:'美国环境保护署（EPA）',
+        intro:'EPA 负责农药注册与再评审。其科学评估报告涵盖化学、毒理、环境命运、生态效应等领域。',
+        platforms: [
+          { title:'Regulations.gov', url:'https://www.regulations.gov/', desc:'主要查询平台。每个农药活性成分都有专属案卷号（Docket ID，格式 EPA-HQ-OPP-YYYY-XXXX）。' },
+          { title:'EPA Pesticide Chemical Search', url:'https://iaspub.epa.gov/apex/pesticides/f?p=CHEMICALSEARCH:1', desc:'辅助平台，输入物质名称可直接获取该农药的注册状态、Fact Sheet 和相关案卷链接。' },
+        ]},
+      { name:'欧盟 EFSA', flag:'🇪🇺', agency:'欧洲食品安全局（EFSA）',
+        intro:'EFSA 负责对农药活性成分进行同行评审（Peer Review），发布 EFSA Conclusion。',
+        platforms: [
+          { title:'EFSA Journal (Wiley Online Library)', url:'https://efsa.onlinelibrary.wiley.com/journal/18314732', desc:'搜索 "Peer review of the pesticide risk assessment of the active substance [农药英文名]"。' },
+          { title:'Open EFSA', url:'https://open.efsa.europa.eu/', desc:'EFSA 开放数据平台。' },
+          { title:'欧盟农药数据库', url:'https://ec.europa.eu/food/plant/pesticides/eu-pesticides-database/start/screen/active-substances', desc:'关联平台。' },
+          { title:'EFSA征求意见', url:'https://www.efsa.europa.eu/en/calls/consultations', desc:'EFSA公开征求意见与公众咨询。' },
+        ]},
+      { name:'日本', flag:'🇯🇵', agency:'食品安全委员会（FSCJ）',
+        intro:'日本实行双轨制：农林水产省（MAFF）负责药效及安全评估；食品安全委员会（FSCJ）负责食品安全风险评估。',
+        platforms: [
+          { title:'FSCJ 评价结果数据库', url:'https://www.fsc.go.jp/english/evaluationreports/agrichemicalsl_e1.html', desc:'输入农药日文名或英文名查询。' },
+          { title:'Food Safety (J-STAGE)', url:'https://www.jstage.jst.go.jp/browse/foodfscj', desc:'FSCJ 官方英文电子期刊。' },
+        ]},
+      { name:'澳大利亚', flag:'🇦🇺', agency:'澳大利亚农药和兽药管理局（APVMA）',
+        intro:'APVMA 发布公开评估报告，涵盖化学、毒理学、职业健康与安全等方面。',
+        platforms: [
+          { title:'APVMA Public Release Summaries', url:'https://apvma.gov.au/agricultural-chemicals/registration-and-permits/approving-new-active-constituents-and-new-uses/public-release-summaries', desc:'新活性成分公开意见征求摘要。' },
+          { title:'APVMA Chemical Review', url:'https://apvma.gov.au/agricultural-chemicals/registration-and-permits/chemical-review', desc:'老旧农药再评审。' },
+        ]},
+      { name:'加拿大', flag:'🇨🇦', agency:'加拿大卫生部有害生物管理局（PMRA）',
+        intro:'PMRA 发布详细的评估决定文件。',
+        platforms: [
+          { title:'PMRA Decisions and Publications', url:'https://www.canada.ca/en/health-canada/corporate/about-health-canada/branches-agencies/pest-management-regulatory-agency/industry/professionals/registration-process/decision-publications.html', desc:'寻找 PRD/PRVD 和 RD/RVD 编码文件。' },
+          { title:'Pesticide Product Information Database', url:'https://pr-rp.hc-sc.gc.ca/ls-re/index-eng.php', desc:'加拿大农药产品信息数据库。' },
+        ]},
+    ];
+
+    return `<div class="tool-panel active" id="panel-registry-assessment"><div class="tool-card">
+      <div class="tool-card-title">农药数据查询</div>
+      <div class="tool-card-desc">查询各国农药评估报告及国际组织农药数据。</div>
+      <div class="assess-search"><input class="form-input" type="text" id="assess-search-input" placeholder="搜索国家、机构或平台名称..." oninput="filterAssessCards()"></div>
+      <div class="assess-tips"><strong>检索建议：</strong>使用英文通用名（ISO Common Name）或 CAS 号作为检索关键词。</div>
+      ${countries.map(c => `<div class="assess-country">
+        <div class="assess-country-header"><span class="assess-flag">${c.flag}</span><div><div class="assess-country-name">${c.name}</div><div class="assess-agency">${c.agency}</div></div></div>
+        <div class="assess-intro">${c.intro}</div>
+        <div class="assess-platforms">${c.platforms.map(p => `<div class="assess-platform"><div class="assess-platform-title"><a href="${p.url}" target="_blank" rel="noopener noreferrer" class="reg-link">${p.title}</a></div><div class="assess-platform-desc">${p.desc}</div></div>`).join('')}</div></div>`).join('')}
+      <div class="assess-tool-box">
+        <div class="assess-section-title">国际组织</div>
+        <div class="assess-country"><div class="assess-country-header"><span class="assess-flag">🌐</span><div><div class="assess-country-name">FAO/WHO 农药残留联合会议（JMPR）</div><div class="assess-agency">Joint Meeting on Pesticide Residues</div></div></div>
+          <div class="assess-intro">JMPR 是国际上最权威的农药残留及毒理学评估机构。</div>
+          <div class="assess-platforms">
+            <div class="assess-platform"><div class="assess-platform-title"><a href="https://www.who.int/groups/joint-fao-who-meeting-on-pesticide-residues-(jmpr)" target="_blank" rel="noopener noreferrer" class="reg-link">WHO — JMPR 评估报告</a></div><div class="assess-platform-desc">支持按农药有效成分查询历年联合评估报告。</div></div>
+            <div class="assess-platform"><div class="assess-platform-title"><a href="https://www.fao.org/food-safety/scientific-advice/jmpr/en/" target="_blank" rel="noopener noreferrer" class="reg-link">FAO — JMPR 农药残留评估</a></div><div class="assess-platform-desc">FAO 平台。</div></div></div></div>
+        <div class="assess-country"><div class="assess-country-header"><span class="assess-flag">📋</span><div><div class="assess-country-name">FAO 农药标准与规格（JMPS）</div><div class="assess-agency">FAO/WHO Pesticide Specifications</div></div></div>
+          <div class="assess-intro">收录由 FAO/WHO 农药标准联席会议（JMPS）评估通过的农药质量标准。</div>
+          <div class="assess-platforms"><div class="assess-platform"><div class="assess-platform-title"><a href="https://www.fao.org/pest-and-pesticide-management/guidelines-standards/faowho-specifications/en/" target="_blank" rel="noopener noreferrer" class="reg-link">FAO 农药规格及标准数据库</a></div><div class="assess-platform-desc">查询 FAO/WHO 评估通过的农药产品规格。</div></div></div></div>
+        <div class="assess-country"><div class="assess-country-header"><span class="assess-flag">⚖️</span><div><div class="assess-country-name">国际食品法典委员会（Codex）农药残留限量</div><div class="assess-agency">Codex Alimentarius — Pesticide Residues</div></div></div>
+          <div class="assess-intro">基于 JMPR 科学评估结果建立的国际标准数据库。</div>
+          <div class="assess-platforms"><div class="assess-platform"><div class="assess-platform-title"><a href="https://www.fao.org/fao-who-codexalimentarius/codex-texts/dms/pestres/en/" target="_blank" rel="noopener noreferrer" class="reg-link">Codex 农药残留限量查询</a></div><div class="assess-platform-desc">查询国际食品法典委员会制定的农药最大残留限量。</div></div></div></div>
+        <div class="assess-tool-title">辅助工具</div>
+        <div class="assess-platform"><div class="assess-platform-title"><a href="https://sitem.herts.ac.uk/aeru/ppdb/en/" target="_blank" rel="noopener noreferrer" class="reg-link">IUPAC Pesticide Properties Database (PPDB)</a></div>
+          <div class="assess-platform-desc">第三方集成工具，可快速预览毒理终点。</div></div>
+      </div></div></div>`;
+  },
+
+  renderCommonName() {
+    return `<div class="tool-panel active" id="panel-registry-commonname"><div class="tool-card">
+      <div class="tool-card-title">农药通用名查询</div>
+      <div class="tool-card-desc">查询农药的中文及英文通用名（ISO Common Name），以下两个平台均可使用。</div>
+      <div class="cname-platforms">
+        <a href="http://www.bcpcpesticidecompendium.org/index-zh-frame.html" target="_blank" rel="noopener noreferrer" class="cname-card">
+          <div class="cname-card-title">BCPC 农药名称汇编</div><div class="cname-card-url">www.bcpcpesticidecompendium.org</div><div class="cname-card-desc">英国作物保护委员会（BCPC）农药通用名数据库。</div></a>
+        <a href="https://hgt.cirs-group.com/tools/cis/inv/68a82cdc7ba51806a0fdb817" target="_blank" rel="noopener noreferrer" class="cname-card">
+          <div class="cname-card-title">瑞旭集团 农药通用名查询</div><div class="cname-card-url">hgt.cirs-group.com</div><div class="cname-card-desc">瑞旭集团（CIRS）提供的在线农药通用名查询工具。</div></a>
+      </div></div></div>`;
+  },
+};
+
+</script>
+<script>
+// app.js — 核心框架：应用状态、导航、面板渲染、计算调度、初始化
+
+const App = {
+  currentTool: null,
+  history: JSON.parse(localStorage.getItem('ptb_history') || '[]'),
+};
+
+// ========== 侧边栏 ==========
+
+function renderSidebar() {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = MODULES.map((m, mi) => `
+    <div class="nav-module" data-module="${m.id}">
+      <div class="nav-module-title" onclick="toggleModule(this)">
+        <span class="icon">${m.icon}</span>${m.name}<span class="arrow">&#9654;</span>
+      </div>
+      <div class="nav-tools">
+        ${m.tools.map(t => `<button class="nav-tool" data-tool="${m.id}-${t.id}" onclick="selectTool('${m.id}','${t.id}')">${t.name}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleModule(el) { el.parentElement.classList.toggle('open'); }
+
+// ========== 导航 ==========
+
+function goHome() {
+  document.querySelectorAll('.nav-tool').forEach(el => el.classList.remove('active'));
+  App.currentTool = null;
+  document.getElementById('breadcrumb').innerHTML = '<a href="javascript:goHome()" style="color:var(--text-secondary);text-decoration:none;">工具箱</a> / <span>请选择工具</span>';
+  const content = document.getElementById('content');
+  const welcome = document.getElementById('welcome');
+  if (welcome) { content.innerHTML = ''; content.appendChild(welcome); welcome.style.display = ''; }
+  else { location.reload(); }
+  document.getElementById('sidebar').classList.remove('mobile-open');
+}
+
+function selectTool(moduleId, toolId) {
+  const key = `${moduleId}-${toolId}`;
+  App.currentTool = key;
+  document.querySelectorAll('.nav-tool').forEach(el => el.classList.remove('active'));
+  const btn = document.querySelector(`.nav-tool[data-tool="${key}"]`);
+  if (btn) { btn.classList.add('active'); btn.closest('.nav-module').classList.add('open'); }
+  const mod = MODULES.find(m => m.id === moduleId);
+  const tool = mod.tools.find(t => t.id === toolId);
+  document.getElementById('breadcrumb').innerHTML = `<a href="javascript:goHome()" style="color:var(--text-secondary);text-decoration:none;">工具箱</a> / ${mod.name} / <span>${tool.name}</span>`;
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.style.display = 'none';
+  document.getElementById('content').innerHTML = getToolPanel(moduleId, toolId);
+  document.getElementById('sidebar').classList.remove('mobile-open');
+}
+
+// ========== 工具面板定义 ==========
+
+function getToolPanel(moduleId, toolId) {
+  const panels = {
+    // ====== 单位换算 ======
+    'converter-conc': () => {
+      const pid = App.currentTool;
+      return `<div class="tool-panel active" id="panel-${pid}">
+        <div class="tool-card">
+          <div class="tool-card-title">浓度换算</div>
+          <div class="tool-card-desc">在常见浓度单位之间互相换算。涉及 mg/m³（气体单位）时需输入分子量和温压条件；其余单位在水溶液/固体中等价换算。</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">数值</label><input class="form-input" type="number" id="${pid}-val" placeholder="请输入数值" step="any"></div>
+            <div class="form-group"><label class="form-label">原始单位</label><select class="form-select" id="${pid}-from" onchange="concToggleGas('${pid}')">
+              <option value="ppm">百万分之一 (ppm)</option><option value="mg/kg">毫克每千克 (mg/kg)</option><option value="mg/L">毫克每升 (mg/L)</option>
+              <option value="%">百分含量 (%)</option><option value="ppb">十亿分之一 (ppb)</option><option value="μg/g">微克每克 (μg/g)</option><option value="mg/m³">毫克每立方米 (mg/m³)</option></select></div>
+            <div class="form-group"><label class="form-label">目标单位</label><select class="form-select" id="${pid}-to" onchange="concToggleGas('${pid}')">
+              <option value="ppm">百万分之一 (ppm)</option><option value="mg/kg">毫克每千克 (mg/kg)</option><option value="mg/L">毫克每升 (mg/L)</option>
+              <option value="%">百分含量 (%)</option><option value="ppb">十亿分之一 (ppb)</option><option value="μg/g">微克每克 (μg/g)</option><option value="mg/m³">毫克每立方米 (mg/m³)</option></select></div>
+          </div>
+          <div id="${pid}-liq-density-fields" style="display:none;margin-bottom:20px;">
+            <div style="padding:10px 14px;background:var(--info-bg);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--info);">mg/kg 与 mg/L 互换需要输入溶液密度</div>
+            <div class="form-grid" style="grid-template-columns:220px;"><div class="form-group"><label class="form-label">溶液密度 (kg/L)</label><input class="form-input" type="number" id="${pid}-liqDensity" value="1" step="any"><span class="form-hint">水溶液默认 1，有机溶剂需查表</span></div></div></div>
+          <div id="${pid}-gas-fields" style="display:none;margin-bottom:20px;">
+            <div style="padding:10px 14px;background:var(--info-bg);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--info);">涉及 mg/m³（气体浓度）需要以下参数进行换算</div>
+            <div class="form-grid">
+              <div class="form-group"><label class="form-label">分子量 M (g/mol)</label><input class="form-input" type="number" id="${pid}-mw" placeholder="如：200" step="any"><span class="form-hint">农药分子量</span></div>
+              <div class="form-group"><label class="form-label">温度 (°C)</label><input class="form-input" type="number" id="${pid}-temp" value="25" step="any"><span class="form-hint">默认 25°C</span></div>
+              <div class="form-group"><label class="form-label">气压 (hPa)</label><input class="form-input" type="number" id="${pid}-press" value="1013" step="any"><span class="form-hint">默认 1013 hPa</span></div>
+            </div></div>
+          <div class="btn-row"><button class="btn-calculate" onclick="calculate('${pid}')">&#9654; 换算</button><button class="btn-reset" onclick="resetTool('${pid}')">&#8635; 重置</button></div>
+          <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 换算结果</div><div id="result-content-${pid}"></div></div>
+        </div></div>`;
+    },
+    'converter-dosage': () => {
+      const pid = App.currentTool;
+      return `<div class="tool-panel active" id="panel-${pid}">
+        <div class="tool-card">
+          <div class="tool-card-title">用量换算</div>
+          <div class="tool-card-desc">制剂用量(g/亩或mL/亩)与有效成分用量(g a.i./亩或g a.i./公顷)相互转化</div>
+          <div class="form-grid" style="margin-bottom:12px;">
+            <div class="form-group"><label class="form-label">计算方向</label><select class="form-select" id="${pid}-direction" onchange="dosageUnitChanged('${pid}')">
+              <option value="dose2ai">已知制剂用量 → 求有效成分用量</option><option value="ai2dose">已知有效成分用量 → 求制剂用量</option></select></div></div>
+          <div id="${pid}-input-fields" class="form-grid">
+            <div class="form-group" id="${pid}-fg-val"><label class="form-label" id="${pid}-lbl-val">制剂用量</label><input class="form-input" type="number" id="${pid}-val" placeholder="请输入数值" step="any"></div>
+            <div class="form-group" id="${pid}-fg-doseUnit"><label class="form-label" id="${pid}-lbl-unit">制剂用量单位</label><select class="form-select" id="${pid}-doseUnit" onchange="dosageUnitChanged('${pid}')">
+              <option value="mL/亩">mL/亩</option><option value="g/亩">g/亩</option><option value="g/公顷">g/公顷</option><option value="L/公顷">L/公顷</option></select></div>
+            <div class="form-group" id="${pid}-fg-aiUnit" style="display:none;"><label class="form-label">有效成分用量单位</label><select class="form-select" id="${pid}-aiUnit" onchange="dosageUnitChanged('${pid}')">
+              <option value="g a.i./亩">g a.i./亩</option><option value="g a.i./公顷">g a.i./公顷</option></select></div>
+            <div class="form-group"><label class="form-label">有效成分含量</label><input class="form-input" type="number" id="${pid}-content" placeholder="请输入数值" step="any"></div>
+            <div class="form-group"><label class="form-label">有效成分含量单位</label><select class="form-select" id="${pid}-contentUnit" onchange="dosageUnitChanged('${pid}')">
+              <option value="g/L">g a.i./L</option><option value="%">%</option></select></div>
+          </div>
+          <div id="${pid}-density-fields" style="display:none;margin-bottom:20px;">
+            <div style="padding:10px 14px;background:var(--info-bg);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--info);">当前组合需要输入制剂密度进行换算</div>
+            <div class="form-grid" style="grid-template-columns:220px;"><div class="form-group"><label class="form-label">制剂密度 (g/mL or kg/L)</label><input class="form-input" type="number" id="${pid}-density" placeholder="如：1.1" step="any"><span class="form-hint">即 kg/L，水的密度为 1 g/mL</span></div></div></div>
+          <div id="${pid}-formula-hint" style="margin-bottom:20px;"></div>
+          <div class="btn-row"><button class="btn-calculate" onclick="calculate('${pid}')">&#9654; 计算</button><button class="btn-reset" onclick="resetTool('${pid}')">&#8635; 重置</button></div>
+          <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 计算结果</div><div id="result-content-${pid}"></div></div>
+        </div></div>`;
+    },
+    'converter-dilution': () => {
+      const pid = App.currentTool;
+      return `<div class="tool-panel active" id="panel-${pid}">
+        <div class="tool-card">
+          <div class="tool-card-title">稀释换算</div>
+          <div class="tool-card-desc">农药稀释倍数、兑水量与制剂用量的换算</div>
+          <div class="form-grid" style="margin-bottom:12px;">
+            <div class="form-group"><label class="form-label">计算方式</label><select class="form-select" id="${pid}-mode" onchange="dilutionModeChanged('${pid}')">
+              <option value="tank_ml">已知稀释倍数 + 药桶容量 → 制剂用量(mL)</option><option value="tank_g">已知稀释倍数 + 药桶容量 → 制剂用量(g)</option>
+              <option value="mu_dose">已知稀释倍数 + 亩兑水量 → 每亩制剂用量</option><option value="mu_water">已知稀释倍数 + 制剂用量 → 兑水量</option>
+              <option value="calc_ratio">已知亩兑水量 + 有效成分用量 → 稀释倍数</option></select></div></div>
+          <div class="form-grid">
+            <div class="form-group" id="${pid}-fg-ratio"><label class="form-label">稀释倍数（倍）</label><input class="form-input" type="number" id="${pid}-ratio" placeholder="如：1500" step="any"></div>
+            <div class="form-group" id="${pid}-fg-water"><label class="form-label" id="${pid}-lbl-water">药桶容量 (L)</label><input class="form-input" type="number" id="${pid}-water" placeholder="如：16" step="any"></div>
+            <div class="form-group" id="${pid}-fg-dose" style="display:none;"><label class="form-label">制剂用量 (mL 或 g)</label><input class="form-input" type="number" id="${pid}-dose" placeholder="请输入数值" step="any"></div>
+          </div>
+          <div id="${pid}-density-fields" style="display:none;margin-bottom:20px;">
+            <div style="padding:10px 14px;background:var(--info-bg);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--info);">按质量(g)计算需要输入制剂密度</div>
+            <div class="form-grid" style="grid-template-columns:220px;"><div class="form-group"><label class="form-label">制剂密度 (g/mL or kg/L)</label><input class="form-input" type="number" id="${pid}-density" placeholder="如：1.1" step="any"><span class="form-hint">水的密度为 1 g/mL</span></div></div></div>
+          <div id="${pid}-ai-fields" style="display:none;margin-bottom:20px;"><div class="form-grid">
+            <div class="form-group"><label class="form-label">有效成分用量 (g a.i./公顷)</label><input class="form-input" type="number" id="${pid}-aiAmount" placeholder="如：450" step="any"></div>
+            <div class="form-group"><label class="form-label">有效成分含量 (%)</label><input class="form-input" type="number" id="${pid}-aiContent" placeholder="如：20" step="any"></div></div></div>
+          <div id="${pid}-formula-hint" style="margin-bottom:20px;"></div>
+          <div class="btn-row"><button class="btn-calculate" onclick="calculate('${pid}')">&#9654; 计算</button><button class="btn-reset" onclick="resetTool('${pid}')">&#8635; 重置</button></div>
+          <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 计算结果</div><div id="result-content-${pid}"></div></div>
+        </div></div>`;
+    },
+    'converter-area': () => renderTool({ title:'面积换算', desc:'在亩、公顷、平方米和英亩之间换算。',
+      inputs: [{ id:'val', label:'数值', type:'number', placeholder:'请输入数值' },{ id:'from', label:'原始单位', type:'select', options:['亩','公顷 (ha)','平方米 (m²)','英亩 (acre)','平方英尺 (ft²)'] },{ id:'to', label:'目标单位', type:'select', options:['亩','公顷 (ha)','平方米 (m²)','英亩 (acre)','平方英尺 (ft²)'] }] }),
+    'converter-mass': () => renderTool({ title:'质量换算', desc:'在 mg、g、kg、斤、lb 和 oz 之间换算。',
+      inputs: [{ id:'val', label:'数值', type:'number', placeholder:'请输入数值' },{ id:'from', label:'原始单位', type:'select', options:['毫克 (mg)','克 (g)','千克 (kg)','斤','磅 (lb)','盎司 (oz)'] },{ id:'to', label:'目标单位', type:'select', options:['毫克 (mg)','克 (g)','千克 (kg)','斤','磅 (lb)','盎司 (oz)'] }] }),
+    'converter-volume': () => renderTool({ title:'体积换算', desc:'在 mL、L、美制加仑、英制加仑和液体盎司之间换算。',
+      inputs: [{ id:'val', label:'数值', type:'number', placeholder:'请输入数值' },{ id:'from', label:'原始单位', type:'select', options:['毫升 (mL)','升 (L)','美制加仑 (gal/US)','英制加仑 (gal/UK)','液体盎司 (fl oz/US)'] },{ id:'to', label:'目标单位', type:'select', options:['毫升 (mL)','升 (L)','美制加仑 (gal/US)','英制加仑 (gal/UK)','液体盎司 (fl oz/US)'] }] }),
+
+    // ====== 毒性分级 ======
+    'toxicity-acute': () => {
+      const pid = App.currentTool;
+      return `<div class="tool-panel active" id="panel-${pid}"><div class="tool-card">
+        <div class="tool-card-title">急性毒性分级</div>
+        <div class="tool-card-desc">输入 LD50 或 LC50 值，自动判定中国农药毒性等级、WHO 分级和 GHS 急性毒性类别。</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">暴露途径</label><select class="form-select" id="${pid}-route" onchange="acuteRouteChanged('${pid}')">
+            <option value="oral">经口 (LD50, mg/kg)</option><option value="dermal">经皮 (LD50, mg/kg)</option><option value="inhal">吸入 (LC50, mg/m³, 4h)</option></select></div>
+          <div class="form-group"><label class="form-label" id="${pid}-lbl-val">LD50 数值</label><input class="form-input" type="number" id="${pid}-val" placeholder="请输入数值" step="any"></div>
+        </div>
+        <div class="btn-row"><button class="btn-calculate" onclick="calculate('${pid}')">&#9654; 判定</button><button class="btn-reset" onclick="resetTool('${pid}')">&#8635; 重置</button></div>
+        <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 毒性分级结果</div><div id="result-content-${pid}"></div></div>
+      </div></div>`;
+    },
+    'toxicity-compare': () => renderRefTable(),
+    'toxicity-eco': () => {
+      const pid = App.currentTool;
+      return `<div class="tool-panel active" id="panel-${pid}"><div class="tool-card">
+        <div class="tool-card-title">生态毒性分级</div>
+        <div class="tool-card-desc">输入对非靶标生物的毒性数据，自动判定生态毒性等级。</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">测试生物</label><select class="form-select" id="${pid}-organism" onchange="ecoOrganismChanged('${pid}')">
+            <option value="fish">鱼类 — LC50(96h)</option><option value="daphnia">溞类 — EC50(48h)</option><option value="algae">藻类 — EC50(72h)</option>
+            <option value="bird_oral">鸟类(经口) — LD50</option><option value="bird_diet">鸟类(饲喂) — LC50</option><option value="bee">蜜蜂 — LD50(48h)</option>
+            <option value="silkworm">家蚕 — LC50(96h)</option><option value="trichogramma">天敌赤眼蜂 — 安全系数</option><option value="earthworm">蚯蚓 — LC50(14d)</option>
+            <option value="crustacean">大型甲壳类 — LC50(96h)</option><option value="amphibian">天敌两栖类 — LC50(96h)</option><option value="plant">非靶标植物 — EC50</option>
+            <option value="livestock">家畜 — LC50(28d)</option></select></div>
+          <div class="form-group"><label class="form-label" id="${pid}-lbl-val">毒性数值</label>
+            <div class="form-input-group"><input class="form-input" type="number" id="${pid}-val" placeholder="请输入数值" step="any">
+            <span class="form-select" id="${pid}-unit-display" style="display:flex;align-items:center;justify-content:center;min-width:120px;background:#f0f0f0;color:var(--text-secondary);font-size:12px;cursor:default;border-left:1px solid var(--border);">mg a.i./L</span></div></div>
+        </div>
+        <div class="btn-row"><button class="btn-calculate" onclick="calculate('${pid}')">&#9654; 判定</button><button class="btn-reset" onclick="resetTool('${pid}')">&#8635; 重置</button></div>
+        <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 生态毒性分级结果</div><div id="result-content-${pid}"></div></div>
+      </div></div>`;
+    },
+    'toxicity-ecoCompare': () => renderEcoRefTable(),
+
+    // ====== 风险评估 ======
+    'risk-rq': () => {
+      const pid = App.currentTool;
+      const formulations = Object.keys(UE_DATA.formulationToCategory);
+      return `<div class="tool-panel active" id="panel-${pid}"><div class="tool-card">
+        <div class="tool-card-title">施药者健康风险评估</div>
+        <div class="tool-card-desc">依据 NY/T 3153-2017，基于单位暴露量数据同时计算3种防护水平下经皮和吸入途径的暴露量与风险系数，综合 RQ ≤ 1 表示风险可接受。</div>
+        <div style="padding:10px 14px;background:var(--info-bg);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--info);line-height:1.8;"><strong>公式：</strong><br>
+          经皮暴露量 = (配药经皮UE × 配药透皮吸收率 + 施药经皮UE × 施药透皮吸收率) × 用药量(kg a.i./ha) × 面积(ha) ÷ 体重(kg)<br>
+          吸入暴露量 = (配药吸入UE + 施药吸入UE) × 用药量(kg a.i./ha) × 面积(ha) ÷ 体重(kg)<br>综合 RQ = RQ<sub>经皮</sub> + RQ<sub>吸入</sub></div>
+        <h3 style="font-size:13px;font-weight:600;color:var(--primary);margin:0 0 10px;">施药场景参数</h3>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">剂型</label><select class="form-select" id="${pid}-formulation"><option value="">-- 请选择剂型 --</option>${formulations.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
+          <div class="form-group" style="position:relative;"><label class="form-label">登记作物（可选）</label><input class="form-input" type="text" id="${pid}-cropSearch" placeholder="输入作物名搜索..." autocomplete="off" oninput="rqCropSearch('${pid}')" onfocus="rqCropSearch('${pid}')"><input type="hidden" id="${pid}-crop">
+            <div id="${pid}-cropDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid var(--border);border-radius:6px;max-height:220px;overflow-y:auto;box-shadow:var(--shadow-md);"></div></div>
+          <div class="form-group"><label class="form-label">防治对象（可选）</label><select class="form-select" id="${pid}-target" onchange="rqTargetChanged('${pid}')"><option value="">-- 请先选择作物 --</option></select></div>
+          <div class="form-group"><label class="form-label">喷雾方向</label><select class="form-select" id="${pid}-spraydir"><option value="">-- 全部方向 --</option><option value="低">低</option><option value="中">中</option><option value="高">高</option></select><span class="form-hint">低 = 高度 &lt;80cm；中 = 80~130cm；高 = &gt;130cm</span></div>
+          <div class="form-group"><label class="form-label">有效成分用药量 (kg a.i./ha)</label><input class="form-input" type="number" id="${pid}-aiRate" placeholder="如：0.5" step="any"><span class="form-hint">制剂用量 × 有效成分含量换算后的值</span></div>
+          <div class="form-group"><label class="form-label">施药面积 (公顷)</label><input class="form-input" type="number" id="${pid}-area" placeholder="如：1" step="any" value="1"><span class="form-hint">默认 1 公顷</span></div>
+          <div class="form-group"><label class="form-label">体重 (kg)</label><input class="form-input" type="number" id="${pid}-bw" placeholder="如：60.6" step="any" value="60.6"><span class="form-hint">默认 60.6 kg</span></div>
+        </div>
+        <h3 style="font-size:13px;font-weight:600;color:var(--primary);margin:20px 0 10px;">允许暴露量 (AOEL)</h3>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">经皮 AOEL 数据来源</label><select class="form-select" id="${pid}-aoelDermalSource" onchange="rqAoelSourceChanged('${pid}')">
+            <option value="dermal">经皮毒性试验数据（直接推导）</option><option value="oral">经口毒性试验数据（替代途径，需透皮吸收率）</option></select><span class="form-hint">经皮 AOEL 优先采用经皮毒性试验数据</span></div>
+          <div class="form-group"><label class="form-label">吸入 AOEL 数据来源</label><select class="form-select" id="${pid}-aoelInhalSource">
+            <option value="inhal">吸入毒性试验数据（直接推导）</option><option value="oral">经口毒性试验数据（替代途径）</option></select><span class="form-hint">吸入 AOEL 优先采用吸入毒性试验数据</span></div>
+          <div class="form-group"><label class="form-label">经皮 AOEL (mg/kg bw/day)</label><input class="form-input" type="number" id="${pid}-aoelDermal2" placeholder="NOAEL ÷ UF" step="any"><span class="form-hint">采用匹配途径的亚急/亚慢毒性试验 NOAEL ÷ UF</span></div>
+          <div class="form-group"><label class="form-label">吸入 AOEL (mg/kg bw/day)</label><input class="form-input" type="number" id="${pid}-aoelInhal2" placeholder="NOAEL ÷ UF" step="any"><span class="form-hint">采用匹配途径的亚急/亚慢毒性试验 NOAEL ÷ UF</span></div>
+        </div>
+        <div id="${pid}-absorption-section" style="display:none;margin-top:16px;">
+          <div style="padding:10px 14px;background:var(--warning-bg);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--warning);line-height:1.8;"><strong>透皮吸收率说明：</strong>当经皮 AOEL 采用经口毒性替代数据推导时，需用透皮吸收率修正经皮暴露量。<br>初级评估默认 100%。如有实测数据可输入以优化高级评估。</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">配药透皮吸收率（制剂母液）%</label><input class="form-input" type="number" id="${pid}-absMix" placeholder="默认 100" step="any" value="100"><span class="form-hint">缺少试验数据时默认 100%</span></div>
+            <div class="form-group"><label class="form-label">施药透皮吸收率（稀释液）%</label><input class="form-input" type="number" id="${pid}-absApply" placeholder="默认 100" step="any" value="100"><span class="form-hint">缺少试验数据时默认 100%</span></div>
+          </div></div>
+        <div class="btn-row"><button class="btn-calculate" onclick="calculate('${pid}')">&#9654; 计算</button><button class="btn-reset" onclick="resetTool('${pid}')">&#8635; 重置</button></div>
+        <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 计算结果</div><div id="result-content-${pid}"></div></div>
+      </div></div>`;
+    },
+    'risk-dietary': () => {
+      const pid = App.currentTool;
+      const foodOpts = DIETARY_FOOD_CATEGORIES.map(c => `<option value="${c.name}">${c.name}（${(c.consumption * 1000).toFixed(1)} g/天）</option>`).join('');
+      return `<div class="tool-panel active" id="panel-${pid}"><div class="tool-card">
+        <div class="tool-card-title">膳食风险评估</div>
+        <div class="tool-card-desc">根据 NEDI（国家估算每日摄入量）或 TMDI（理论最大每日摄入量）计算膳食摄入量占 ADI 的百分比，%ADI &lt; 100% 表示风险可接受。</div>
+        <div style="padding:10px 14px;background:var(--info-bg);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--info);line-height:1.8;"><strong>NEDI 计算公式：</strong><br>
+          NEDI = &Sigma;[ STMR<sub>i</sub>（或 STMR-P<sub>i</sub>）&times; F<sub>i</sub> ]<br>
+          NEDI<sub>bw</sub> = NEDI &divide; 体重(kg)<br><br>
+          STMR<sub>i</sub> — 农药在某一食物中的规范残留试验中值<br>
+          STMR-P<sub>i</sub> — 用加工因子校正的规范残留试验中值<br>
+          F<sub>i</sub> — 一般人群某一食物的消费量 (kg/天)<br><br>
+          <strong>说明：</strong>如果没有合适的 STMR，可以使用相应的 MRL 值进行评估，结果将标注为 TMDI（理论最大每日摄入量）。<br>
+          <strong>数据来源：</strong>食物消费量参考《2002年中国居民营养与健康现状》（2004年10月12日公布）。</div>
+        <div class="form-grid" style="grid-template-columns:200px;"><div class="form-group"><label class="form-label">体重 (kg)</label><input class="form-input" type="number" id="${pid}-bw" value="63" step="any"><span class="form-hint">中国默认成人 63 kg，儿童 15 kg</span></div>
+          <div class="form-group"><label class="form-label">ADI (mg/kg bw/day)</label><input class="form-input" type="number" id="${pid}-adi" placeholder="请输入 ADI" step="any"></div></div>
+        <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin:12px 0 8px;">食物列表</h4>
+        <div id="${pid}-food-rows"></div>
+        <div style="margin:8px 0 16px;"><button onclick="dietaryAddRow('${pid}')" style="background:none;border:1px dashed var(--primary);color:var(--primary);padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;">+ 添加食物</button></div>
+        <div class="btn-row"><button class="btn-calculate" onclick="calculate('${pid}')">&#9654; 计算</button><button class="btn-reset" onclick="resetTool('${pid}')">&#8635; 重置</button></div>
+        <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 计算结果</div><div id="result-content-${pid}"></div></div>
+      </div></div>`;
+    },
+    'risk-cropClassify': () => {
+      const pid = App.currentTool;
+      const categories = [...new Set(CROP_FOOD_MAPPING.map(r => r.category))];
+      const rows = CROP_FOOD_MAPPING.map((r, i) => `<tr data-crop="${r.crop}" data-category="${r.category}">
+        <td>${i + 1}</td><td>${r.crop}</td><td>${r.category}</td></tr>`).join('');
+      const categoryFilter = categories.map(c => `<label style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:12px;cursor:pointer;">
+        <input type="checkbox" value="${c}" onchange="cropClassifyFilter()" checked> ${c}</label>`).join('');
+      return `<div class="tool-panel active" id="panel-${pid}"><div class="tool-card">
+        <div class="tool-card-title">膳食风险评估作物分类</div>
+        <div class="tool-card-desc">查询登记作物对应的风险评估食物归类，用于确定膳食风险评估中的食物消费量参考值。数据来源于《2002年中国居民营养与健康现状》膳食结构分类。</div>
+        <div style="margin-bottom:12px;"><input class="form-input" type="text" id="${pid}-search" placeholder="输入作物名称搜索（如：水稻、黄瓜）..." oninput="cropClassifyFilter()" style="width:100%;max-width:400px;"></div>
+        <div style="margin-bottom:12px;padding:10px 14px;background:#fafafa;border-radius:6px;border:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;">按归类筛选：</div>
+          ${categoryFilter}
+        </div>
+        <div class="ref-table-wrap"><table class="ref-table" id="${pid}-table"><thead><tr><th style="width:50px;">序号</th><th>作物名称</th><th>风险评估食物归类</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">共 ${CROP_FOOD_MAPPING.length} 条记录</div>
+      </div></div>`;
+    },
+    'risk-adi': () => renderTool({ title:'ADI 推算', desc:'根据 NOAEL 和不确定系数计算 ADI（每日允许摄入量）。',
+      inputs: [{ id:'noael', label:'NOAEL (mg/kg bw/day)', type:'number', placeholder:'请输入 NOAEL' },{ id:'uf', label:'不确定系数 (UF)', type:'number', placeholder:'如：100', hint:'通常为 10~1000' }] }),
+    'risk-uf': () => renderUFTable(),
+    'risk-ue': () => {
+      const pid = 'risk-ue';
+      const formulations = Object.keys(UE_DATA.formulationToCategory);
+      return `<div class="tool-panel active" id="panel-${pid}"><div class="tool-card">
+        <div class="tool-card-title">单位暴露量查询</div>
+        <div class="tool-card-desc">查询背负式喷雾施药人员单位暴露量（第一版），适用于健康风险评估。选择剂型和作物后自动查询。</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">剂型</label><select class="form-select" id="${pid}-formulation" onchange="ueAutoQuery()"><option value="">-- 请选择剂型 --</option>${formulations.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
+          <div class="form-group" style="position:relative;"><label class="form-label">登记作物（可选）</label><input class="form-input" type="text" id="${pid}-cropSearch" placeholder="输入作物名搜索..." autocomplete="off" oninput="ueCropSearch()" onfocus="ueCropSearch()"><input type="hidden" id="${pid}-crop">
+            <div id="${pid}-cropDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid var(--border);border-radius:6px;max-height:220px;overflow-y:auto;box-shadow:var(--shadow-md);"></div></div>
+          <div class="form-group"><label class="form-label">防治对象（可选）</label><select class="form-select" id="${pid}-target" onchange="ueTargetChanged()"><option value="">-- 请先选择作物 --</option></select></div>
+          <div class="form-group"><label class="form-label">喷雾方向</label><select class="form-select" id="${pid}-spraydir" onchange="ueAutoQuery()"><option value="">-- 全部方向 --</option><option value="低">低</option><option value="中">中</option><option value="高">高</option></select><span class="form-hint">低 = 高度 &lt;80cm；中 = 80~130cm；高 = &gt;130cm</span></div>
+        </div>
+        <div class="result-area" id="result-${pid}"><div class="result-title">&#10003; 单位暴露量结果</div><div id="result-content-${pid}"></div></div>
+      </div></div>`;
+    },
+
+    // ====== 登记查询 ======
+    'registry-global': () => RegistryUI.renderGlobal(),
+    'registry-assessment': () => RegistryUI.renderAssessment(),
+    'registry-commonname': () => RegistryUI.renderCommonName(),
+  };
+  return panels[`${moduleId}-${toolId}`]?.() || '';
+}
+
+// ========== 计算调度 ==========
+
+const calculators = {
+  'converter-conc': calcConc,
+  'converter-dosage': calcDosage,
+  'converter-dilution': calcDilution,
+  'converter-area': calcArea,
+  'converter-mass': calcMass,
+  'converter-volume': calcVolume,
+  'risk-rq': calcRiskRq,
+  'risk-dietary': calcDietary,
+  'risk-adi': calcAdi,
+  'toxicity-acute': calcAcuteTox,
+  'toxicity-eco': calcEcoTox,
+};
+
+function calculate(panelId) {
+  const resultArea = document.getElementById(`result-${panelId}`);
+  const resultContent = document.getElementById(`result-content-${panelId}`);
+  if (!resultArea || !resultContent) return;
+  const inputs = document.querySelectorAll(`#panel-${panelId} .form-input, #panel-${panelId} .form-select`);
+  const vals = {};
+  inputs.forEach(inp => { vals[inp.id.replace(`${panelId}-`, '')] = inp.value; });
+  const fn = calculators[panelId];
+  if (fn) {
+    resultContent.innerHTML = fn(vals);
+    resultArea.classList.add('visible');
+    addHistory(panelId, vals);
+  } else {
+    resultContent.innerHTML = '<div style="padding:16px;background:#fff3e0;border-radius:6px;color:#e65100;font-size:13px;">该工具的计算逻辑尚未实现。</div>';
+    resultArea.classList.add('visible');
+  }
+}
+
+// ========== 重置 & 历史 ==========
+
+function resetTool(panelId) {
+  document.querySelectorAll(`#panel-${panelId} .form-input`).forEach(el => {
+    if (el.id.endsWith('-temp')) el.value = '25';
+    else if (el.id.endsWith('-press')) el.value = '1013';
+    else el.value = '';
+  });
+  const resultArea = document.getElementById(`result-${panelId}`);
+  if (resultArea) resultArea.classList.remove('visible');
+}
+
+function addHistory(panelId, vals) {
+  const mod = MODULES.find(m => m.tools.some(t => `${m.id}-${t.id}` === panelId));
+  const tool = mod?.tools.find(t => `${mod.id}-${t.id}` === panelId);
+  App.history.unshift({ tool: tool ? `${mod.name} - ${tool.name}` : panelId, data: JSON.stringify(vals), time: new Date().toLocaleString('zh-CN') });
+  if (App.history.length > 50) App.history.pop();
+  localStorage.setItem('ptb_history', JSON.stringify(App.history));
+}
+
+function toggleFollow() { document.getElementById('followDropdown').classList.toggle('open'); }
+
+function renderHomeFeatures() {
+  const grid = document.getElementById('homeFeatureGrid');
+  if (!grid) return;
+  grid.innerHTML = MODULES.map(m => `
+    <div class="home-grid-item"><div class="item-icon">${m.icon}</div>
+    <div class="item-text"><strong>${m.name}</strong><span>${m.tools.map(t => `<a href="javascript:void(0)" class="home-tool-link" onclick="selectTool('${m.id}','${t.id}')">${t.name}</a>`).join('、')}</span></div></div>
+  `).join('');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = `repeat(${MODULES.length}, 1fr)`;
+}
+
+// ========== 全局事件 ==========
+
+document.addEventListener('click', (e) => {
+  // 作物下拉关闭
+  ['risk-rq', 'risk-ue'].forEach(pid => {
+    const dropdown = document.getElementById(`${pid}-cropDropdown`);
+    const input = document.getElementById(`${pid}-cropSearch`);
+    if (dropdown && input && !dropdown.contains(e.target) && e.target !== input) dropdown.style.display = 'none';
+  });
+  // 关注下拉关闭
+  const wrap = document.querySelector('.follow-wrap');
+  if (wrap && !wrap.contains(e.target)) document.getElementById('followDropdown').classList.remove('open');
+});
+
+// ========== 初始化 ==========
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSidebar();
+  renderHomeFeatures();
+});
+
+</script>
+</body>
+</html>
