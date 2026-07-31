@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎨 我的暑假作息表</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: linear-gradient(135deg, #fce4ec 0%, #e3f2fd 50%, #fff3e0 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    padding: 15mm 12mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 装饰元素 */
+  .page::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #ffd54f44 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .page::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: -40px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, #81d4fa44 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  /* 标题区 */
+  .header {
+    text-align: center;
+    margin-bottom: 18px;
+    position: relative;
+    z-index: 1;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #f57c00, #e91e63);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 4px;
+  }
+  .header .sub {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+  .header .motto {
+    font-size: 13px;
+    color: #e91e63;
+    margin-top: 6px;
+    font-weight: 700;
+    background: #fce4ec;
+    display: inline-block;
+    padding: 3px 18px;
+    border-radius: 20px;
+  }
+
+  /* 信息栏 */
+  .info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #fff8e1, #e8f5e9);
+    border-radius: 10px;
+    font-size: 12px;
+    color: #666;
+    position: relative;
+    z-index: 1;
+  }
+  .info-bar .name-line input {
+    border: none;
+    border-bottom: 2px dashed #ffb74d;
+    width: 100px;
+    font-size: 12px;
+    padding: 2px 6px;
+    background: transparent;
+    outline: none;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+  .info-bar .weather {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 表格主体 */
+  .schedule {
+    position: relative;
+    z-index: 1;
+  }
+
+  .schedule table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+  }
+
+  /* 表头 */
+  .schedule thead th {
+    background: linear-gradient(135deg, #ffb74d, #ff8a65);
+    color: white;
+    padding: 8px 4px;
+    font-weight: 700;
+    font-size: 12px;
+    border: 1px solid #ffe0b2;
+    position: relative;
+  }
+  .schedule thead th:first-child {
+    border-radius: 8px 0 0 0;
+    width: 70px;
+  }
+  .schedule thead th:last-child {
+    border-radius: 0 8px 0 0;
+  }
+  .schedule thead th .clock-icon {
+    display: inline-block;
+    margin-right: 4px;
+  }
+
+  /* 行 */
+  .schedule tbody td {
+    padding: 6px 5px;
+    border: 1px solid #f0f0f0;
+    vertical-align: middle;
+    text-align: center;
+    transition: background 0.2s;
+  }
+  .schedule tbody tr:hover td {
+    background: #fafafa;
+  }
+
+  /* 时间列 */
+  .time-cell {
+    font-weight: 700;
+    color: #5d4037;
+    background: #fff8e1 !important;
+    white-space: nowrap;
+    font-size: 10px;
+  }
+  .time-cell .clock {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 1px;
+  }
+
+  /* 活动列 */
+  .activity-cell {
+    text-align: left !important;
+    padding-left: 10px !important;
+    color: #444;
+  }
+  .activity-cell .emoji {
+    margin-right: 4px;
+  }
+
+  /* 备注列 */
+  .note-cell {
+    font-size: 10px;
+    color: #999;
+    width: 60px;
+  }
+
+  /* 分类颜色 */
+  .cat-morning   { background: #fff3e0 !important; }
+  .cat-study     { background: #e3f2fd !important; }
+  .cat-active    { background: #e8f5e9 !important; }
+  .cat-play      { background: #fce4ec !important; }
+  .cat-rest      { background: #f3e5f5 !important; }
+  .cat-evening   { background: #e0f7fa !important; }
+  .cat-night     { background: #ede7f6 !important; }
+
+  /* 底部 */
+  .footer {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: #bbb;
+    position: relative;
+    z-index: 1;
+  }
+  .footer .stars {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  /* 装饰时钟 */
+  .deco-clock {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    width: 80px;
+    height: 80px;
+    border: 3px solid #ffccbc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: rgba(255,255,255,0.6);
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* 自评区 */
+  .self-check {
+    margin-top: 12px;
+    display: flex;
+    gap: 20px;
+    font-size: 11px;
+    color: #888;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+  .self-check span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .self-check .box {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid #ccc;
+    border-radius: 3px;
+    margin-right: 2px;
+  }
+
+  /* 打印优化 */
+  @media print {
+    body { background: white; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; padding: 10mm; }
+    .schedule tbody tr:hover td { background: inherit; }
+  }
+
+  /* 小屏适配 */
+  @media (max-width: 500px) {
+    .page { width: 100%; min-height: auto; padding: 10px; border-radius: 0; }
+    .schedule table { font-size: 10px; }
+    .schedule thead th { font-size: 10px; padding: 6px 2px; }
+    .schedule tbody td { padding: 4px 3px; }
+    .time-cell { font-size: 9px; }
+    .header h1 { font-size: 20px; }
+    .info-bar { flex-wrap: wrap; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 标题 -->
+  <div class="header">
+    <h1>☀️ 我的快乐暑假作息表</h1>
+    <div class="sub">合理安排时间 · 快乐度过每一天</div>
+    <div class="motto">⏰ 做时间的小主人！</div>
+  </div>
+
+  <!-- 信息栏 -->
+  <div class="info-bar">
+    <div class="name-line">
+      📝 姓名：<input type="text" placeholder="_________" value="">
+    </div>
+    <div class="name-line">
+      📅 日期：2026年7月 ~ 8月
+    </div>
+    <div class="weather">
+      ☀️ 天气：<input type="text" placeholder="☀️ 🌧 🌥" value="" style="border:none;border-bottom:2px dashed #81c784;width:60px;font-size:12px;padding:2px 4px;background:transparent;outline:none;font-family:'Noto Sans SC',sans-serif;">
+    </div>
+  </div>
+
+  <!-- 作息表 -->
+  <div class="schedule">
+    <table>
+      <thead>
+        <tr>
+          <th>⏰ 时间</th>
+          <th>📋 活动安排</th>
+          <th>💡 小贴士</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="time-cell cat-morning">🛏️<br>7:00 - 7:30</td>
+          <td class="activity-cell cat-morning"><span class="emoji">🌅</span> 起床洗漱 · 伸个懒腰 · 喝杯温水</td>
+          <td class="note-cell">养成早睡早起好习惯</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-morning">🏃<br>7:30 - 8:00</td>
+          <td class="activity-cell cat-morning"><span class="emoji">🤸</span> 晨间运动：跳绳 / 拉伸 / 晨跑</td>
+          <td class="note-cell">让身体醒过来</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-morning">🍳<br>8:00 - 8:30</td>
+          <td class="activity-cell cat-morning"><span class="emoji">🥛</span> 营养早餐时间</td>
+          <td class="note-cell">早餐要吃好</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-study">📖<br>8:30 - 10:00</td>
+          <td class="activity-cell cat-study"><span class="emoji">✏️</span> 暑假作业 / 课外阅读 / 练字</td>
+          <td class="note-cell">专注学习不跑神</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-study">🎨<br>10:00 - 10:20</td>
+          <td class="activity-cell cat-study"><span class="emoji">🧁</span> 课间休息 · 吃水果 · 望远</td>
+          <td class="note-cell">保护眼睛👀</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-study">📚<br>10:20 - 11:30</td>
+          <td class="activity-cell cat-study"><span class="emoji">🎯</span> 兴趣学习：英语 / 数学 / 科学实验</td>
+          <td class="note-cell">每天进步一点点</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-active">🍲<br>11:30 - 12:30</td>
+          <td class="activity-cell cat-active"><span class="emoji">🥗</span> 午餐时间 · 帮忙摆碗筷</td>
+          <td class="note-cell">不挑食</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-rest">😴<br>12:30 - 14:00</td>
+          <td class="activity-cell cat-rest"><span class="emoji">💤</span> 午休时间 · 小睡一下</td>
+          <td class="note-cell">下午更有精神</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-play">🎨<br>14:00 - 15:30</td>
+          <td class="activity-cell cat-play"><span class="emoji">🎭</span> 创意时间：画画 / 手工 / 乐高 / 编程</td>
+          <td class="note-cell">发挥想象力</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-play">🍪<br>15:30 - 16:00</td>
+          <td class="activity-cell cat-play"><span class="emoji">🍿</span> 下午茶 · 自由活动</td>
+          <td class="note-cell">放松一下</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-active">🚴<br>16:00 - 17:30</td>
+          <td class="activity-cell cat-active"><span class="emoji">🌳</span> 户外活动：骑车 / 打球 / 散步</td>
+          <td class="note-cell">多晒太阳长高高</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-evening">🛁<br>17:30 - 18:30</td>
+          <td class="activity-cell cat-evening"><span class="emoji">🍜</span> 晚餐 · 洗澡 · 整理房间</td>
+          <td class="note-cell">自己的事情自己做</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-evening">📺<br>18:30 - 19:30</td>
+          <td class="activity-cell cat-evening"><span class="emoji">🎬</span> 亲子时光：看电视 / 聊天 / 玩游戏</td>
+          <td class="note-cell">和家人在一起</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-night">📖<br>19:30 - 20:30</td>
+          <td class="activity-cell cat-night"><span class="emoji">🌟</span> 睡前阅读 · 写日记 · 计划明天</td>
+          <td class="note-cell">每天记录美好</td>
+        </tr>
+        <tr>
+          <td class="time-cell cat-night">🌙<br>20:30 - 21:00</td>
+          <td class="activity-cell cat-night"><span class="emoji">🧸</span> 准备睡觉 · 和爸妈说晚安</td>
+          <td class="note-cell">保证充足睡眠</td>
+        </tr>
+        <tr style="background:#fff8e1;">
+          <td class="time-cell" style="background:#fff3e0 !important;font-weight:700;">💤<br>21:00</td>
+          <td class="activity-cell" style="text-align:center !important;color:#e91e63;font-weight:700;">
+            🌛 熄灯睡觉 · 晚安好梦～
+          </td>
+          <td class="note-cell">明天又是美好的一天</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 自评区 -->
+  <div class="self-check">
+    <span><span class="box"></span> ⭐ 今天全部完成</span>
+    <span><span class="box"></span> ⭐ 大部分完成</span>
+    <span><span class="box"></span> ⭐ 明天继续加油</span>
+  </div>
+
+  <!-- 底部 -->
+  <div class="footer">
+    <span>🎨 我的暑假 · 我做主</span>
+    <span class="stars">⭐ ⭐ ⭐ ⭐ ⭐</span>
+    <span>✏️ 每天进步一点点</span>
+  </div>
+
+  <!-- 装饰时钟 -->
+  <div class="deco-clock">⏰</div>
+</div>
+</body>
+</html>
