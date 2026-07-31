@@ -42,7 +42,10 @@
     .la-link {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+      width: 100%;
+      max-width: 320px;
       padding: 14px 32px;
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: #fff;
@@ -53,6 +56,7 @@
       transition: transform 0.2s, box-shadow 0.2s;
       box-shadow: 0 4px 16px rgba(108,122,224,0.3);
     }
+    .la-link + .la-link { margin-top: 16px; }
     .la-link:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(108,122,224,0.4); }
     .back-link {
       display: inline-block;
@@ -71,8 +75,8 @@
     <div class="card-title">扶墙走 · 管理后台</div>
     <div class="card-sub">用户访问数据与事件追踪统计</div>
     <a href="https://www.51.la/user/dashboard" target="_blank" class="la-link">📊 打开 51.la 数据面板 →</a>
-    <br><br>
     <a href="pesticide-toolbox-v1-2026.html" target="_blank" class="la-link">🌾 农药登记工具箱 →</a>
+    <a href="shuxue.html" target="_blank" class="la-link">☀️ 暑假作息表 →</a>
     <br>
     <a href="index.html" class="back-link">← 返回前台首页</a>
   </div>
